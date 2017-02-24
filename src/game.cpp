@@ -4,19 +4,17 @@
 #include "spaceship.h"
 #include "camera.h"
 
-//constexpr float ftStep = 1.f;
-//constexpr float ftSlice = 1.f;
 
 int main() {
     sf::RenderWindow window({800,600}, "Spaceship");
-    window.setFramerateLimit(50);
 
     Spaceship spaceship(window);
     Camera camera(&spaceship);
 
     sf::Clock clock;
     sf::Time elapsedTime;
-    //float currentSlice = 0.f;
+    sf::Time simulationTime;
+    sf::Time timeSlice = sf::milliseconds(16.f);
 
     sf::Event event;
     while(window.isOpen()) {
@@ -30,8 +28,11 @@ int main() {
 
         window.clear({0,24,72});
 
-        spaceship.update(elapsedTime);
-        camera.update(elapsedTime);
+        simulationTime = sf::seconds(0.f);
+        for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
+            spaceship.update(timeSlice);
+            camera.update(timeSlice);
+        }
 
         spaceship.draw(camera);
         window.display();
