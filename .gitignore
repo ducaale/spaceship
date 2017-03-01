@@ -2,3 +2,5 @@
 *.o
 # ignore final exuctuble
 game
+# sprites folder
+sprite/
