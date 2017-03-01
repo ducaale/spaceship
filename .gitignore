@@ -1,2 +1,4 @@
 # build files
 *.o
+# ignore final exuctuble
+game
