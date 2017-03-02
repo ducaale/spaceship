@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "spaceship.h"
+#include "theOrb.h"
 #include "camera.h"
 
 
@@ -9,6 +10,7 @@ int main() {
     sf::RenderWindow window({800,600}, "Spaceship");
 
     Spaceship spaceship(window);
+    TheOrb theOrb(window, spaceship);
     Camera camera(&spaceship);
 
     sf::Clock clock;
@@ -31,9 +33,11 @@ int main() {
         simulationTime = sf::seconds(0.f);
         for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
             spaceship.update(timeSlice);
+            theOrb.update(timeSlice);
             camera.update(timeSlice);
         }
 
+        theOrb.draw(camera);
         spaceship.draw(camera);
         window.display();
 
