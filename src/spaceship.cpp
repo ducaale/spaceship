@@ -11,7 +11,7 @@ Spaceship::Spaceship(sf::RenderWindow &w):
     direction{1, 0},
     coordinate{0,0},
     velocity{0, 0},
-    maxSpeed(200.f),
+    maxSpeed(300.f),
     speed(0.f),
     acceleration(600),
     isThrusterOn(false)
