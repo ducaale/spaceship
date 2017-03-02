@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "spaceship.h"
 
+#include "utility.h"
 
 Camera::Camera(Spaceship *spaceship):
     coordinate(spaceship->getCoordinate()),
@@ -10,14 +11,11 @@ Camera::Camera(Spaceship *spaceship):
 {}
 
 void Camera::update(sf::Time elapsedTime) {
-    if(offset != spaceship->getDirection() * 200.f) {
-        offset += spaceship->getDirection() * 20.f;
-    }
-    offset *= 0.9f;
 
-    coordinate = spaceship->getCoordinate() + offset + spaceship->getVelocity();
-    coordinate -= sf::Vector2f(400,300);   // center camera
+    offset = spaceship->getDirection() * 150.f;
+    coordinate = utility::lerp(0.02, coordinate,
+            spaceship->getCoordinate() + offset + (spaceship->getVelocity() * 80.f));
 }
 
 
-sf::Vector2f Camera::getCoordinate() { return coordinate; }
+sf::Vector2f Camera::getCoordinate() { return coordinate - sf::Vector2f(400,300); }
