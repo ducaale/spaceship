@@ -49,7 +49,7 @@ private:
     sf::Vector2f coordinate;
     sf::Vector2f velocity;
 
-    float maxSpeed, speed;
+    float maxSpeed, speed, acceleration;
 
 };
 
