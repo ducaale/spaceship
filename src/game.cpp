@@ -13,6 +13,11 @@ int main() {
     TheOrb theOrb(window, spaceship);
     Camera camera(&spaceship);
 
+    sf::Texture texture;
+    texture.loadFromFile("../background/nebula.png");
+    sf::Sprite background(texture);
+    background.setScale(1/1.28f, 1/1.28f);
+
     sf::Clock clock;
     sf::Time elapsedTime;
     sf::Time simulationTime;
@@ -37,6 +42,7 @@ int main() {
             camera.update(timeSlice);
         }
 
+        window.draw(background);
         theOrb.draw(camera);
         spaceship.draw(camera);
         window.display();
