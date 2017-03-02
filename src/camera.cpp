@@ -1,8 +1,6 @@
 #include "camera.h"
 #include "spaceship.h"
 
-#include <iostream>
-#include <algorithm>
 
 Camera::Camera(Spaceship *spaceship):
     coordinate(spaceship->getCoordinate()),
@@ -21,8 +19,5 @@ void Camera::update(sf::Time elapsedTime) {
     coordinate -= sf::Vector2f(400,300);   // center camera
 }
 
-float Camera::clamp(float n, float lower, float upper) {
-    return std::max(lower, std::min(n, upper));
-}
 
 sf::Vector2f Camera::getCoordinate() { return coordinate; }
