@@ -13,7 +13,7 @@ Spaceship::Spaceship(sf::RenderWindow &w):
     velocity{0, 0},
     maxSpeed(300.f),
     speed(0.f),
-    acceleration(600),
+    acceleration(300),
     isThrusterOn(false)
 {
     texture.loadFromFile("../spritesheet/player_ship.png");
@@ -81,8 +81,8 @@ void Spaceship::accelerate(sf::Time elapsedTime) {
 }
 void Spaceship::deccelerate(sf::Time elapsedTime) {
     disableThrusters();
-    if(speed > 0.01f)
-        speed *= 0.9f;
+    if(speed > 0.f)
+        speed -= acceleration * elapsedTime.asSeconds();
     else
         speed = 0.f;
 }
