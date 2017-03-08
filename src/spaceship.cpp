@@ -36,22 +36,7 @@ Spaceship::Spaceship(sf::RenderWindow &w):
 }
 
 void Spaceship::update(sf::Time elapsedTime) {
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
-        gun.fire(elapsedTime, getGunPos(), getDirection());
-    }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-        steerLeft();
-    }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-        steerRight();
-    }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-        accelerate(elapsedTime);
-    }
-    else {
-        deccelerate(elapsedTime);
-    }
-
+    handleInput(elapsedTime);
     coordinate += velocity;
     velocity = direction * speed * elapsedTime.asSeconds();
 
@@ -71,6 +56,24 @@ void Spaceship::draw(Camera &camera){
 
     if(isThrusterOn)
         window.draw(thruster);
+}
+
+void Spaceship::handleInput(sf::Time elapsedTime) {
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
+        gun.fire(elapsedTime, getGunPos(), getDirection());
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+        steerLeft();
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+        steerRight();
+    }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+        accelerate(elapsedTime);
+    }
+    else {
+        deccelerate(elapsedTime);
+    }
 }
 
 void Spaceship::accelerate(sf::Time elapsedTime) {

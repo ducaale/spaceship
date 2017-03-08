@@ -24,6 +24,8 @@ public:
     sf::Vector2f getEnginePos();
 
 private:
+    void handleInput(sf::Time elapsedTime);
+
     void enableThrusters();
     void disableThrusters();
 
