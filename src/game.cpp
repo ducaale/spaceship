@@ -11,7 +11,7 @@ int main() {
 
     Spaceship spaceship(window);
     TheOrb theOrb(window, spaceship);
-    Camera camera(&spaceship);
+    Camera camera(&spaceship, &theOrb);
 
     sf::Texture texture;
     texture.loadFromFile("../background/nebula.png");
