@@ -1,7 +1,11 @@
 #ifndef THEORB_H
 #define THEORB_H
 
-#include "spaceship.h"
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+
+class Spaceship;
+class Camera;
 
 class TheOrb {
 public:
@@ -10,10 +14,16 @@ public:
     void update(sf::Time &elapsedTime);
     void draw(Camera &camera);
 
+    sf::Vector2f getCoordinate();
 private:
     sf::Sprite body;
     sf::Sprite arm1;
     sf::Sprite arm2;
+
+    sf::Transform rotation;
+    sf::Transform translation;
+
+    sf::Vector2f arm1_coor, arm2_coor;
 
     Spaceship &player;
 
