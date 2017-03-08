@@ -1,7 +1,6 @@
 #include "bullet.h"
 #include "camera.h"
 #include <math.h>
-#include <iostream>
 
 Bullet::Bullet() {}
 
@@ -30,7 +29,7 @@ void Bullet::update(sf::Time elapsedTime) {
         velocity = direction * speed * elapsedTime.asSeconds();
         coordinate += velocity;
     }
-    
+
     if(distanceTraveled() > 600) destroyed = true;
 }
 
@@ -40,5 +39,5 @@ void Bullet::draw(sf::RenderWindow *window, Camera *camera) {
 }
 
 float Bullet::distanceTraveled() {
-   return sqrt( pow((coordinate.x - intialCoordinate.x), 2) + pow((coordinate.y - intialCoordinate.y), 2) ); 
+   return sqrt( pow((coordinate.x - intialCoordinate.x), 2) + pow((coordinate.y - intialCoordinate.y), 2) );
 }

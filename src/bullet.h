@@ -4,7 +4,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-#include "camera.h"
+class Camera;
 
 class Bullet {
 public:

@@ -1,7 +1,4 @@
 #include "gun.h"
-#include "bullet.h"
-
-#include <iostream>
 
 Gun::Gun() {};
 

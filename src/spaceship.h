@@ -5,10 +5,10 @@
 #include <SFML/Graphics.hpp>
 
 #include "AnimatedSprite.hpp"
-#include "gun.h"
 
 class Camera;
 //class Gun;
+#include "gun.h"
 
 class Spaceship {
 public:

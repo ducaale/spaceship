@@ -1,6 +1,5 @@
 #include "spaceship.h"
 #include "camera.h"
-#include "gun.h"
 
 #include <iostream>
 
