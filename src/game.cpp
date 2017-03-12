@@ -4,14 +4,17 @@
 #include "spaceship.h"
 #include "theOrb.h"
 #include "camera.h"
-
+#include "theOrbPhysicsComponent.h"
+#include "theOrbGraphicsComponent.h"
 
 int main() {
     sf::RenderWindow window({800,600}, "Spaceship");
 
     Spaceship spaceship(window);
-    TheOrb theOrb(window, spaceship);
-    Camera camera(&spaceship, &theOrb);
+    TheOrb* theOrb = new TheOrb(new TheOrbPhysicsComponent(),
+                                new TheOrbGraphicsComponent(),
+                                spaceship);
+    Camera camera(&spaceship, theOrb);
 
     sf::Texture texture;
     texture.loadFromFile("../background/nebula.png");
@@ -38,12 +41,12 @@ int main() {
         simulationTime = sf::seconds(0.f);
         for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
             spaceship.update(timeSlice);
-            theOrb.update(timeSlice);
+            theOrb->update(timeSlice);
             camera.update(timeSlice);
         }
 
         window.draw(background);
-        theOrb.draw(camera);
+        theOrb->draw(window, camera);
         spaceship.draw(camera);
         window.display();
 

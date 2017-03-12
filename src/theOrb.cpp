@@ -1,11 +1,15 @@
+
 #include "theOrb.h"
 #include "utility.h"
 #include "spaceship.h"
-#include <iostream>
 
-TheOrb::TheOrb(sf::RenderWindow &w, Spaceship &player) :
-    player(player),
-    window(w)
+#include "graphicsComponent.h"
+#include "physicsComponent.h"
+
+TheOrb::TheOrb(PhysicsComponent* physics, GraphicsComponent* graphics, Spaceship &player) :
+    physics(physics),
+    graphics(graphics),
+    player(player)
 {
     coordinate = sf::Vector2f(900.f,0.f);
     texture.loadFromFile("../spritesheet/the_orb.png");
@@ -25,25 +29,11 @@ TheOrb::TheOrb(sf::RenderWindow &w, Spaceship &player) :
 }
 
 void TheOrb::update(sf::Time &elapsedTime) {
-    float angle = atan2(coordinate.y - player.getCoordinate().y,
-            coordinate.x - player.getCoordinate().x) * 180 / 3.141;
-    body.rotate((angle - body.getRotation()));
-
-    arm1_coor = utility::rotatePoint(arm1_coor, coordinate, angle - arm1.getRotation());
-    arm2_coor = utility::rotatePoint(arm2_coor, coordinate, angle - arm2.getRotation());
-
-    arm1.rotate((angle - arm1.getRotation()));
-    arm2.rotate((angle - arm2.getRotation()));
+    this->physics->update(*this, elapsedTime);
 }
 
-void TheOrb::draw(Camera &camera) {
-    body.setPosition(coordinate - camera.getCoordinate());
-    arm1.setPosition(arm1_coor - camera.getCoordinate());
-    arm2.setPosition(arm2_coor - camera.getCoordinate());
-
-    window.draw(arm1);
-    window.draw(arm2);
-    window.draw(body);
+void TheOrb::draw(sf::RenderWindow &window, Camera &camera) {
+    this->graphics->update(*this, window, camera);
 }
 
 sf::Vector2f TheOrb::getCoordinate() { return coordinate; }
