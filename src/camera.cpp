@@ -1,27 +1,19 @@
 #include "camera.h"
 #include "utility.h"
 #include "spaceship.h"
-#include "theOrb.h"
 #include <iostream>
 
-Camera::Camera(Spaceship *spaceship, TheOrb *theOrb):
+Camera::Camera(Spaceship *spaceship):
     coordinate(spaceship->getCoordinate()),
     offset(0.f, 0.f),
-    spaceship(spaceship),
-    theOrb(theOrb)
+    spaceship(spaceship)
 {}
 
 void Camera::update(sf::Time elapsedTime) {
 
-    if(utility::magnitude(spaceship->getCoordinate(), theOrb->getCoordinate()) < 800) {
-        coordinate = utility::lerp(0.02, coordinate,
-                (spaceship->getCoordinate() + theOrb->getCoordinate()) / 2.f );
-    }
-    else {
-        offset = spaceship->getDirection() * 150.f;
-        coordinate = utility::lerp(0.02, coordinate,
-                spaceship->getCoordinate() + offset + (spaceship->getVelocity() * 80.f));
-    }
+    offset = spaceship->getDirection() * 150.f;
+    coordinate = utility::lerp(0.02, coordinate,
+            spaceship->getCoordinate() + offset + (spaceship->getVelocity() * 80.f));
 }
 
 
