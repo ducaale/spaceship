@@ -1,53 +1,74 @@
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-
+#include "game.h"
 #include "spaceship.h"
-#include "theOrb.h"
 #include "camera.h"
+#include "components.h"
+#include <iostream>
 
+Entity& Game::createEnemy() {
+    auto& entity = manager.addEntity();
+    entity.addComponent<CPosition>(sf::Vector2f(100.f,100.f));
+    entity.addComponent<CSprite>(this, sf::Sprite(eTexture, {0,0,128,128}));
 
-int main() {
-    sf::RenderWindow window({800,600}, "Spaceship");
+    return entity;
+}
 
-    Spaceship spaceship(window);
-    TheOrb theOrb(window, spaceship);
-    Camera camera(&spaceship, &theOrb);
+Game::Game() {
+    spaceship = new Spaceship(window);
+    camera = new Camera(spaceship);
 
-    sf::Texture texture;
-    texture.loadFromFile("../background/nebula.png");
-    sf::Sprite background(texture);
-    background.setScale(1/1.28f, 1/1.28f);
-
-    sf::Clock clock;
-    sf::Time elapsedTime;
-    sf::Time simulationTime;
-    sf::Time timeSlice = sf::milliseconds(16.f);
-
-    sf::Event event;
-    while(window.isOpen()) {
-        while(window.pollEvent(event)) {
-            if(event.type == sf::Event::Closed) {
-                window.close();
-            }
-        }
-
-        elapsedTime = clock.restart();
-
-        window.clear({0,24,72});
-
-        simulationTime = sf::seconds(0.f);
-        for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
-            spaceship.update(timeSlice);
-            theOrb.update(timeSlice);
-            camera.update(timeSlice);
-        }
-
-        window.draw(background);
-        theOrb.draw(camera);
-        spaceship.draw(camera);
-        window.display();
-
+    if(!eTexture.loadFromFile("../spritesheet/the_orb.png")) {
+        std::cout << "unable to load file" << std::endl;
     }
 
+    createEnemy();
+    //sf::Texture texture;
+    //texture.loadFromFile("../background/nebula.png");
+    //sf::Sprite background(texture);
+    //background.setScale(1/1.28f, 1/1.28f);
+}
+
+void Game::run() {
+    while(window.isOpen()) {
+        elapsedTime = clock.restart();
+
+        window.clear(sf::Color::Black);
+
+        inputPhase();
+        updatePhase();
+        drawPhase();
+
+    }
+}
+
+void Game::inputPhase() {
+    while(window.pollEvent(event)) {
+        if(event.type == sf::Event::Closed) {
+            window.close();
+        }
+    }
+}
+
+void Game::updatePhase() {
+    simulationTime = sf::seconds(0.f);
+    for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
+        spaceship->update(timeSlice);
+        camera->update(timeSlice);
+        manager.update(timeSlice.asSeconds());
+    }
+}
+
+void Game::drawPhase() {
+    //window.draw(background);
+    spaceship->draw(*camera);
+    manager.draw();
+    window.display();
+}
+
+void Game::render(const sf::Drawable& drawable) {
+    window.draw(drawable);
+}
+
+int main() {
+    Game().run();
     return 0;
 }
