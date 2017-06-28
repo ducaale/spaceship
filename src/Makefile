@@ -1,4 +1,4 @@
-CC:=clang++-3.8
+CC:=clang++-3.9
 CFLAGS=-c -Wall -std=c++11
 LDFLAGS=
 LIBS=-lsfml-graphics -lsfml-window -lsfml-system
