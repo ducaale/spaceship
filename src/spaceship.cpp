@@ -20,7 +20,7 @@ Spaceship::Spaceship(sf::RenderWindow &w):
     body.setScale(0.4f, 0.4f);
     body.setOrigin(80.f, 38.f);
 
-    gun = Gun(texture, 5, 500.f);
+    gun = Gun(texture, 5, 400.f);
 
     thrusterAnimation.setSpriteSheet(texture);
     thrusterAnimation.addFrame({0,70,160,70});

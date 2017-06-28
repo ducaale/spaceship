@@ -7,7 +7,7 @@ Bullet::Bullet() {}
 Bullet::Bullet(sf::Texture *texture, sf::Vector2f coordinate, sf::Vector2f direction, float speed) {
 
     bullet = sf::Sprite(*texture, {204,140,70,70});
-    bullet.setScale(0.3f, 0.3f);
+    bullet.setScale(0.4f, 0.4f);
     bullet.setOrigin(45.f, 45.f);
 
     nFrames = 0;

@@ -11,7 +11,7 @@ Gun::Gun(sf::Texture &texture, float rateOfFire, float speed) :
 void Gun::fire(sf::Time elapsedTime, sf::Vector2f coordinate, sf::Vector2f direction) {
     lastFired += elapsedTime;
 
-    if(lastFired.asSeconds() > 0.1f) {
+    if(lastFired.asSeconds() > 0.2f) {
         bullets.emplace_back(texture, coordinate, direction, speed);
         lastFired = sf::Time();
     }
