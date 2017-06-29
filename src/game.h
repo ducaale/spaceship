@@ -22,6 +22,8 @@ public:
 
     void render(const sf::Drawable& drawable);
     Entity& createEnemy();
+    Entity& createLeftArm();
+    Entity& createRightArm();
 
     Camera *camera = nullptr;
 

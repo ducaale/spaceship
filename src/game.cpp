@@ -16,11 +16,29 @@ Entity& Game::createEnemy() {
     return entity;
 }
 
+Entity& Game::createLeftArm() {
+    auto& entity = manager.addEntity();
+    entity.addComponent<CPosition>(sf::Vector2f(100.f,50.f));
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,384,128,32}));
+
+    return entity;
+}
+
+Entity& Game::createRightArm() {
+    auto& entity = manager.addEntity();
+    entity.addComponent<CPosition>(sf::Vector2f(100.f,250.f));
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,384,128,32}));
+
+    return entity;
+}
+
 Game::Game() {
     spaceship = new Spaceship(window);
     camera = new Camera(spaceship);
 
     createEnemy();
+    createLeftArm();
+    createRightArm();
     //sf::Texture texture;
     //texture.loadFromFile("../background/nebula.png");
     //sf::Sprite background(texture);
