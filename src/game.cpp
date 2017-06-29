@@ -5,9 +5,13 @@
 #include <iostream>
 
 Entity& Game::createEnemy() {
+    auto& texture = resource["orb"];
+    if(!texture.loadFromFile("../spritesheet/the_orb.png")) {
+        std::cout << "unable to load file" << std::endl;
+    }
     auto& entity = manager.addEntity();
     entity.addComponent<CPosition>(sf::Vector2f(100.f,100.f));
-    entity.addComponent<CSprite>(this, sf::Sprite(eTexture, {0,0,128,128}));
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
 
     return entity;
 }
@@ -15,10 +19,6 @@ Entity& Game::createEnemy() {
 Game::Game() {
     spaceship = new Spaceship(window);
     camera = new Camera(spaceship);
-
-    if(!eTexture.loadFromFile("../spritesheet/the_orb.png")) {
-        std::cout << "unable to load file" << std::endl;
-    }
 
     createEnemy();
     //sf::Texture texture;

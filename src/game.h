@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "manager.h"
+#include <map>
 
 class Spaceship;
 class Camera;
@@ -38,7 +39,7 @@ private:
 
     // temporary
     Spaceship *spaceship = nullptr;
-    sf::Texture eTexture; // temporary
+    std::map<std::string, sf::Texture> resource;
 };
 
 #endif /* GAME_H */
