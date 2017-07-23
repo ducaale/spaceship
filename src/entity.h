@@ -7,21 +7,31 @@
 #include <memory>
 
 #include "component.h"
+struct Manager;
 
 constexpr std::size_t maxComponents = 32;
+constexpr std::size_t maxGroups = 32;
 
+using Group = std::size_t;
+using GroupBitset = std::bitset<maxGroups>;
 using ComponentBitset = std::bitset<maxComponents>;
 using ComponentArray = std::array<Component*, maxComponents>;
 
 class Entity {
 private:
+    Manager& manager;
+
     bool alive = true;
     std::vector<std::unique_ptr<Component>> components;
 
     ComponentArray componentArray;
     ComponentBitset componentBitset;
 
+    GroupBitset groupBitset;
+
 public:
+    Entity(Manager& manager) : manager(manager) {}
+
     void update(float elapsedTime) {
         for(auto& c : components) c->update(elapsedTime);
     }
@@ -37,6 +47,13 @@ public:
     bool hasComponent() const {
         return componentBitset[getComponentTypeID<T>()];
     }
+
+    bool hasGroup(Group group) const {
+        return groupBitset[group];
+    }
+
+    void addGroup(Group group);
+    void delGroup(Group group) { groupBitset[group] = false; }
 
     template <typename T, typename... Targs>
     T& addComponent(Targs&&... mArgs) {

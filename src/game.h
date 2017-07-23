@@ -22,12 +22,16 @@ public:
 
     void render(const sf::Drawable& drawable);
     Entity& createEnemy();
-    Entity& createLeftArm();
-    Entity& createRightArm();
+    Entity& createLeftArm(Entity& parent);
+    Entity& createRightArm(Entity& parent);
 
     Camera *camera = nullptr;
 
 private:
+    enum Groups : std::size_t {
+        drawable
+    };
+
     sf::RenderWindow window{{800,600}, "Spaceship"};
 
     sf::Clock clock;
