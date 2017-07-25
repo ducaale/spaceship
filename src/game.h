@@ -20,7 +20,7 @@ public:
     void inputPhase();
     void drawPhase();
 
-    void render(const sf::Drawable& drawable);
+    void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
     Entity& createEnemy();
     Entity& createLeftArm(Entity& parent);
     Entity& createRightArm(Entity& parent);

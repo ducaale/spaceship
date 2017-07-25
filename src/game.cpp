@@ -10,23 +10,29 @@ Entity& Game::createEnemy() {
         std::cout << "unable to load file" << std::endl;
     }
     auto& entity = manager.addEntity();
-    entity.addComponent<CPosition>(sf::Vector2f(100.f,100.f));
+    entity.addComponent<CPosition>(sf::Vector2f(200.f,200.f));
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
+    entity.addComponent<CRotate>();
+
+    createLeftArm(entity);
+    createRightArm(entity);
 
     return entity;
 }
 
-Entity& Game::createLeftArm() {
+Entity& Game::createLeftArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CPosition>(sf::Vector2f(100.f,50.f));
+    entity.addComponent<CPosition>(sf::Vector2f(0.f,-100.f));
+    entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,384,128,32}));
 
     return entity;
 }
 
-Entity& Game::createRightArm() {
+Entity& Game::createRightArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CPosition>(sf::Vector2f(100.f,250.f));
+    entity.addComponent<CPosition>(sf::Vector2f(0.f,100.f));
+    entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,384,128,32}));
 
     return entity;
@@ -37,8 +43,6 @@ Game::Game() {
     camera = new Camera(spaceship);
 
     createEnemy();
-    createLeftArm();
-    createRightArm();
     //sf::Texture texture;
     //texture.loadFromFile("../background/nebula.png");
     //sf::Sprite background(texture);
@@ -82,8 +86,8 @@ void Game::drawPhase() {
     window.display();
 }
 
-void Game::render(const sf::Drawable& drawable) {
-    window.draw(drawable);
+void Game::render(const sf::Drawable& drawable, const sf::Transform& t) {
+    window.draw(drawable, t);
 }
 
 int main() {
