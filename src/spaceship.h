@@ -6,8 +6,6 @@
 
 #include "AnimatedSprite.hpp"
 
-class Camera;
-//class Gun;
 #include "gun.h"
 
 class Spaceship {
@@ -15,7 +13,7 @@ public:
     Spaceship(sf::RenderWindow &window);
 
     void update(sf::Time elapsedTime);
-    void draw(Camera &camera);
+    void draw();
 
     sf::Vector2f getCoordinate();
     sf::Vector2f getDirection();

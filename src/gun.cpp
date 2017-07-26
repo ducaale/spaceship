@@ -27,7 +27,7 @@ void Gun::update(sf::Time elapsedTime) {
     }
 }
 
-void Gun::draw(sf::RenderWindow *window, Camera *camera) {
+void Gun::draw(sf::RenderWindow *window) {
     for(auto& bullet : bullets)
-        bullet.draw(window, camera);
+        bullet.draw(window);
 }

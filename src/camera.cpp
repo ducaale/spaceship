@@ -17,4 +17,4 @@ void Camera::update(sf::Time elapsedTime) {
 }
 
 
-sf::Vector2f Camera::getCoordinate() { return coordinate - sf::Vector2f(400,300); }
+sf::Vector2f Camera::getCoordinate() { return coordinate; }

@@ -1,5 +1,4 @@
 #include "spaceship.h"
-#include "camera.h"
 
 #include <iostream>
 
@@ -43,15 +42,15 @@ void Spaceship::update(sf::Time elapsedTime) {
     gun.update(elapsedTime);
 }
 
-void Spaceship::draw(Camera &camera){
+void Spaceship::draw(){
 
-    body.setPosition(coordinate - camera.getCoordinate());
+    body.setPosition(coordinate);
 
     thruster.setPosition(getEnginePos());
     thruster.setRotation(body.getRotation());
 
     window.draw(body);
-    gun.draw(&window, &camera);
+    gun.draw(&window);
 
     if(isThrusterOn)
         window.draw(thruster);

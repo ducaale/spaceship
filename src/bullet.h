@@ -4,14 +4,12 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-class Camera;
-
 class Bullet {
 public:
     Bullet();
     Bullet(sf::Texture *texture, sf::Vector2f coordinate, sf::Vector2f direction, float speed);
     void update(sf::Time frameTime);
-    void draw(sf::RenderWindow *window, Camera *camera);
+    void draw(sf::RenderWindow *window);
 
     float distanceTraveled();
     bool isDestroyed() const { return destroyed; }

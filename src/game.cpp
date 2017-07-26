@@ -81,7 +81,9 @@ void Game::updatePhase() {
 
 void Game::drawPhase() {
     //window.draw(background);
-    spaceship->draw(*camera);
+    view.setCenter(camera->getCoordinate());
+    window.setView(view);
+    spaceship->draw();
     manager.draw();
     window.display();
 }

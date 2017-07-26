@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 
 #include "bullet.h"
-#include "camera.h"
 
 class Gun {
 public:
@@ -14,7 +13,7 @@ public:
     void fire(sf::Time elapsedTime, sf::Vector2f coordinate, sf::Vector2f direction);
 
     void update(sf::Time elapsedTime);
-    void draw(sf::RenderWindow *window, Camera *camera);
+    void draw(sf::RenderWindow *window);
 
 private:
     sf::Texture *texture;

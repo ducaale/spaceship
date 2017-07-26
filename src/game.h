@@ -33,6 +33,7 @@ private:
     };
 
     sf::RenderWindow window{{800,600}, "Spaceship"};
+    sf::View view{{0, 0,800, 600}};
 
     sf::Clock clock;
     sf::Time elapsedTime;

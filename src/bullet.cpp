@@ -1,5 +1,4 @@
 #include "bullet.h"
-#include "camera.h"
 #include <math.h>
 
 Bullet::Bullet() {}
@@ -33,8 +32,8 @@ void Bullet::update(sf::Time elapsedTime) {
     if(distanceTraveled() > 600) destroyed = true;
 }
 
-void Bullet::draw(sf::RenderWindow *window, Camera *camera) {
-    bullet.setPosition(coordinate - camera->getCoordinate());
+void Bullet::draw(sf::RenderWindow *window) {
+    bullet.setPosition(coordinate);
     window->draw(bullet);
 }
 
