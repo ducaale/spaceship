@@ -1,8 +1,7 @@
 #include "spaceship.h"
 
 #include <iostream>
-
-#define PI 3.14159265
+#include "utility.h"
 
 Spaceship::Spaceship(sf::RenderWindow &w):
     window(w),

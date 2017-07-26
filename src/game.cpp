@@ -4,7 +4,7 @@
 #include "components.h"
 #include <iostream>
 
-Entity& Game::createEnemy() {
+Entity& Game::createEnemy(Spaceship& target) {
     auto& texture = resource["orb"];
     if(!texture.loadFromFile("../spritesheet/the_orb.png")) {
         std::cout << "unable to load file" << std::endl;
@@ -12,7 +12,7 @@ Entity& Game::createEnemy() {
     auto& entity = manager.addEntity();
     entity.addComponent<CPosition>(sf::Vector2f(200.f,200.f));
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
-    entity.addComponent<CRotate>();
+    entity.addComponent<CTarget>(target);
 
     createLeftArm(entity);
     createRightArm(entity);
@@ -42,7 +42,7 @@ Game::Game() {
     spaceship = new Spaceship(window);
     camera = new Camera(spaceship);
 
-    createEnemy();
+    createEnemy(*spaceship);
     //sf::Texture texture;
     //texture.loadFromFile("../background/nebula.png");
     //sf::Sprite background(texture);
