@@ -12,7 +12,7 @@ Entity& Game::createEnemy(Spaceship& target) {
     auto& entity = manager.addEntity();
     entity.addComponent<CPosition>(sf::Vector2f(200.f,200.f));
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
-    entity.addComponent<CTarget>(target);
+    entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
     createLeftArm(entity);
     createRightArm(entity);

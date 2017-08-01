@@ -98,12 +98,22 @@ struct CRotate : Component {
     }
 };
 
+/*
+ * https://gist.github.com/JISyed/6445974
+ */
 struct CTarget : Component {
     CSprite *cSprite = nullptr;
     CPosition *cPosition = nullptr;
-    Spaceship& target;
 
-    CTarget(Spaceship& target) : target(target) {}
+    Spaceship& target;
+    float turn_speed, accuracy;
+    float least_accurate_aim = 30.0f;
+
+    CTarget(Spaceship& target, float turn_speed, float accuracy) :
+        target(target),
+        turn_speed(turn_speed),
+        accuracy(1.0 - accuracy)
+    {}
 
     void init() override {
         cSprite = &entity->getComponent<CSprite>();
@@ -111,10 +121,34 @@ struct CTarget : Component {
     }
 
     void update(float elapsedTime) override {
-        float angle = atan2(cPosition->y() - target.getCoordinate().y,
+        float target_angle = atan2(cPosition->y() - target.getCoordinate().y,
                 cPosition->x() - target.getCoordinate().x) * 180 / PI;
 
-        cSprite->sprite.rotate((angle - cSprite->sprite.getRotation()));
+        float facing_angle = cSprite->sprite.getRotation();
+
+        if(target_angle < 0) {
+            target_angle += 360;
+        }
+
+
+        float angle_diff =  facing_angle - target_angle;
+
+        if(std::abs(angle_diff) > 180) {
+            if(facing_angle > target_angle) {
+                angle_diff = - (360 - facing_angle + target_angle);
+            }
+            else {
+                angle_diff = 360 - target_angle + facing_angle;
+            }
+        }
+
+        if(angle_diff > least_accurate_aim * accuracy) {
+            cSprite->sprite.rotate(-turn_speed);
+        }
+        else if(angle_diff < least_accurate_aim * -accuracy) {
+            cSprite->sprite.rotate(turn_speed);
+        }
+
     }
 
 };
