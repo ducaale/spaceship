@@ -16,11 +16,15 @@
 struct CParent;
 struct CSprite;
 
-struct CPosition : Component {
+struct CTransform : Component {
     sf::Vector2f position;
+    float angle;
 
-    CPosition() = default;
-    CPosition(const sf::Vector2f& position) : position(position) {}
+    CTransform() = default;
+    CTransform(const sf::Vector2f& position, float angle = 0) : 
+        position(position),
+        angle(angle)
+    {}
 
     float x() const { return position.x;  }
     float y() const { return position.y;  }
@@ -35,7 +39,7 @@ struct CParent : Component {
 
 struct CSprite : Component {
     Game *game = nullptr;
-    CPosition *cPosition = nullptr;
+    CTransform *cTransform = nullptr;
     CParent *cParent = nullptr;
 
     sf::Sprite sprite;
@@ -52,7 +56,7 @@ struct CSprite : Component {
     }
 
     void init() override {
-        cPosition = &entity->getComponent<CPosition>();
+        cTransform = &entity->getComponent<CTransform>();
         if(entity->hasComponent<CParent>()) {
             cParent = &entity->getComponent<CParent>();
         }
@@ -67,7 +71,8 @@ struct CSprite : Component {
     }
 
     void update(float elapsedTime) override {
-        sprite.setPosition(cPosition->position);
+        sprite.setPosition(cTransform->position);
+        sprite.setRotation(cTransform->angle);
     }
 
     void draw() override {
@@ -84,26 +89,12 @@ sf::Transform CParent::getTransform() {
     return parent->getComponent<CSprite>().getTransform();
 }
 
-struct CRotate : Component {
-    CSprite *cSprite = nullptr;
-    CPosition *cPosition = nullptr;
-
-    void init() override {
-       cSprite = &entity->getComponent<CSprite>();
-       cPosition = &entity->getComponent<CPosition>();
-    }
-
-    void update(float elapsedTime) override {
-        cSprite->sprite.rotate(0.2);
-    }
-};
 
 /*
  * https://gist.github.com/JISyed/6445974
  */
 struct CTarget : Component {
-    CSprite *cSprite = nullptr;
-    CPosition *cPosition = nullptr;
+    CTransform *cTransform = nullptr;
 
     Spaceship& target;
     float turn_speed, accuracy;
@@ -116,15 +107,14 @@ struct CTarget : Component {
     {}
 
     void init() override {
-        cSprite = &entity->getComponent<CSprite>();
-        cPosition = &entity->getComponent<CPosition>();
+        cTransform = &entity->getComponent<CTransform>();
     }
 
     void update(float elapsedTime) override {
-        float target_angle = atan2(cPosition->y() - target.getCoordinate().y,
-                cPosition->x() - target.getCoordinate().x) * 180 / PI;
+        float target_angle = atan2(cTransform->y() - target.getCoordinate().y,
+                cTransform->x() - target.getCoordinate().x) * 180 / PI;
 
-        float facing_angle = cSprite->sprite.getRotation();
+        float facing_angle = cTransform->angle;
 
         if(target_angle < 0) {
             target_angle += 360;
@@ -143,10 +133,10 @@ struct CTarget : Component {
         }
 
         if(angle_diff > least_accurate_aim * accuracy) {
-            cSprite->sprite.rotate(-turn_speed);
+            cTransform->angle -= turn_speed;
         }
         else if(angle_diff < least_accurate_aim * -accuracy) {
-            cSprite->sprite.rotate(turn_speed);
+            cTransform->angle += turn_speed;
         }
 
     }

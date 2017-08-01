@@ -10,7 +10,7 @@ Entity& Game::createEnemy(Spaceship& target) {
         std::cout << "unable to load file" << std::endl;
     }
     auto& entity = manager.addEntity();
-    entity.addComponent<CPosition>(sf::Vector2f(200.f,200.f));
+    entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
@@ -22,7 +22,7 @@ Entity& Game::createEnemy(Spaceship& target) {
 
 Entity& Game::createLeftArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CPosition>(sf::Vector2f(0.f,-100.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-100.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,384,128,32}));
 
@@ -31,7 +31,7 @@ Entity& Game::createLeftArm(Entity& parent) {
 
 Entity& Game::createRightArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CPosition>(sf::Vector2f(0.f,100.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,100.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,384,128,32}));
 
