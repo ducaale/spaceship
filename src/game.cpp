@@ -16,7 +16,7 @@ Entity& Game::createEnemy(Spaceship& target) {
     //
     float width = 128.f;
     float height = 128.f;
-    entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.2), true, false), width, height);
+    entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.8), true, false), width, height);
     
     Animation openEyeAnimation;
     openEyeAnimation.setSpriteSheet(resource["orb"]);
@@ -33,8 +33,10 @@ Entity& Game::createEnemy(Spaceship& target) {
     entity.getComponent<CAnimatedSprite>().animations["openEyeAnimation"] = openEyeAnimation;
     entity.getComponent<CAnimatedSprite>().animations["closeEyeAnimation"] = closeEyeAnimation;
     entity.getComponent<CAnimatedSprite>().currentAnimation = "closeEyeAnimation";
+    entity.getComponent<CAnimatedSprite>().sprite.setAnimation(openEyeAnimation);
 
 
+    entity.addComponent<CEnemyInput>();
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
     //createLeftArm(entity);

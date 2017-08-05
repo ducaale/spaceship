@@ -24,7 +24,7 @@ Spaceship::Spaceship(sf::RenderWindow &w):
     thrusterAnimation.addFrame({0,70,160,70});
     thrusterAnimation.addFrame({160,70,160,70});
 
-    thruster = AnimatedSprite(sf::seconds(0.09), true, false);
+    thruster = AnimatedSprite(sf::seconds(0.09), true, true);
     thruster.setAnimation(thrusterAnimation);
 
     thruster.setScale(0.2f, 0.2f);

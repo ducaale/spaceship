@@ -24,7 +24,7 @@ struct CTransform : Component {
     float angle;
 
     CTransform() = default;
-    CTransform(const sf::Vector2f& position, float angle = 0) : 
+    CTransform(const sf::Vector2f& position, float angle = 0) :
         position(position),
         angle(angle)
     {}
@@ -126,9 +126,13 @@ struct CAnimatedSprite : Component {
         return t;
     }
 
+    void play(const std::string animation) {
+        sprite.play(animations[animation]);
+    }
+
     void update(float elapsedTime) override {
-        sprite.play(animations[currentAnimation]);
         sprite.update(sf::seconds(elapsedTime));
+
         sprite.setPosition(cTransform->position);
         sprite.setRotation(cTransform->angle);
     }
@@ -204,6 +208,26 @@ struct CTarget : Component {
 
     }
 
+};
+
+struct CEnemyInput : Component {
+
+    CAnimatedSprite *cSprite = nullptr;
+
+    void init() override {
+        cSprite = &entity->getComponent<CAnimatedSprite>();
+    }
+
+    void update(float elapsedTime) override {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+            cSprite->sprite.stop();
+            cSprite->play("closeEyeAnimation");
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::O)) {
+            cSprite->sprite.stop();
+            cSprite->play("openEyeAnimation");
+        }
+    }
 };
 
 #endif /* end of include guard: COMPONENTS_H_QD5OJVYS */
