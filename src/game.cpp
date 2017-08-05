@@ -11,11 +11,34 @@ Entity& Game::createEnemy(Spaceship& target) {
     }
     auto& entity = manager.addEntity();
     entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
+
+    //entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
+    //
+    float width = 128.f;
+    float height = 128.f;
+    entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.2), true, false), width, height);
+    
+    Animation openEyeAnimation;
+    openEyeAnimation.setSpriteSheet(resource["orb"]);
+    for(int i = 0; i < 4; i++) {
+        openEyeAnimation.addFrame(sf::IntRect(width * i, 0, width, height));
+    }
+
+    Animation closeEyeAnimation;
+    closeEyeAnimation.setSpriteSheet(resource["orb"]);
+    for(int i = 3; i > -1; i--) {
+        closeEyeAnimation.addFrame(sf::IntRect(width * i, 0, width, height));
+    }
+
+    entity.getComponent<CAnimatedSprite>().animations["openEyeAnimation"] = openEyeAnimation;
+    entity.getComponent<CAnimatedSprite>().animations["closeEyeAnimation"] = closeEyeAnimation;
+    entity.getComponent<CAnimatedSprite>().currentAnimation = "closeEyeAnimation";
+
+
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
-    createLeftArm(entity);
-    createRightArm(entity);
+    //createLeftArm(entity);
+    //createRightArm(entity);
 
     return entity;
 }

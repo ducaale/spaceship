@@ -2,6 +2,7 @@
 #define COMPONENTS_H_QD5OJVYS
 
 #include <vector>
+#include <map>
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
@@ -9,6 +10,8 @@
 #include "game.h"
 #include "component.h"
 #include "entity.h"
+
+#include "AnimatedSprite.hpp"
 
 #include "spaceship.h" //temporary
 #include "utility.h"
@@ -43,6 +46,8 @@ struct CSprite : Component {
     CParent *cParent = nullptr;
 
     sf::Sprite sprite;
+    std::vector<sf::IntRect> rects;
+
     float width, height;
 
     CSprite() = default;
@@ -85,8 +90,66 @@ struct CSprite : Component {
     }
 };
 
+struct CAnimatedSprite : Component {
+    Game *game = nullptr;
+    CTransform *cTransform = nullptr;
+    CParent *cParent = nullptr;
+
+    AnimatedSprite sprite;
+    std::map<std::string, Animation> animations;
+    std::string currentAnimation;
+
+    float width, height;
+
+    CAnimatedSprite() = default;
+    CAnimatedSprite(Game* game, const AnimatedSprite& sprite, float width, float height) :
+        sprite(sprite),
+        game(game),
+        width(width),
+        height(height)
+    {
+        this->sprite.setOrigin(width/2, height/2);
+    }
+
+    void init() override {
+        cTransform = &entity->getComponent<CTransform>();
+        if(entity->hasComponent<CParent>()) {
+            cParent = &entity->getComponent<CParent>();
+        }
+    }
+
+    sf::Transform getTransform() {
+        sprite.setOrigin(0.f, 0.f);
+        sf::Transform t = sprite.getTransform();
+        sprite.setOrigin(width/2.0f, height/2.0f);
+
+        return t;
+    }
+
+    void update(float elapsedTime) override {
+        sprite.play(animations[currentAnimation]);
+        sprite.update(sf::seconds(elapsedTime));
+        sprite.setPosition(cTransform->position);
+        sprite.setRotation(cTransform->angle);
+    }
+
+    void draw() override {
+        if(cParent) {
+            game->render(sprite, cParent->getTransform());
+        }
+        else {
+            game->render(sprite);
+        }
+    }
+};
+
 sf::Transform CParent::getTransform() {
-    return parent->getComponent<CSprite>().getTransform();
+    if(parent->hasComponent<CSprite>()) {
+        return parent->getComponent<CSprite>().getTransform();
+    }
+    else {
+        return parent->getComponent<CAnimatedSprite>().getTransform();
+    }
 }
 
 
