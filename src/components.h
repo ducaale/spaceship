@@ -31,7 +31,43 @@ struct CTransform : Component {
 
     float x() const { return position.x;  }
     float y() const { return position.y;  }
+
+    sf::Vector2f getDirection() const {
+         return new sf::Vector2f(cos(angle * PI / 180), sin(angle * PI / 180));
+    }
 };
+
+struct CPhysics : Component {
+    CTransform *cTransform = nullptr;
+    sf::Vector2f velocity;
+    float maxSpeed, speed, acceleration;
+
+    CPhysics(float maxSpeed, float speed, float acceleration) :
+        maxSpeed(maxSpeed),
+        speed(speed),
+        acceleration(acceleration),
+        velocity{0, 0}
+    {}
+
+    void update(float elapsedTime) override {
+        cTransform->position += velocity;
+        velocity = cTransform->getDirection() * speed * elapsedTime;
+    }
+
+    void accelerate(float elapsedTime) {
+        speed += acceleration * elapsedTime;
+        if(speed > maxSpeed) {
+            speed = maxSpeed;
+        }
+    }
+    
+    void deccelerate(float elapsedTime) {
+        speed -= acceleration * elapsedTime;
+        if(speed < 0) {
+            speed = 0;
+        }
+    }
+}
 
 struct CParent : Component {
     Entity *parent = nullptr;
