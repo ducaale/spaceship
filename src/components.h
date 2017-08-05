@@ -33,7 +33,7 @@ struct CTransform : Component {
     float y() const { return position.y;  }
 
     sf::Vector2f getDirection() const {
-         return new sf::Vector2f(cos(angle * PI / 180), sin(angle * PI / 180));
+         return sf::Vector2f(cos(angle * PI / 180), sin(angle * PI / 180));
     }
 };
 
@@ -67,7 +67,7 @@ struct CPhysics : Component {
             speed = 0;
         }
     }
-}
+};
 
 struct CParent : Component {
     Entity *parent = nullptr;

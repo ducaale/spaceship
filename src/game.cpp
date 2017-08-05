@@ -39,8 +39,8 @@ Entity& Game::createEnemy(Spaceship& target) {
     entity.addComponent<CEnemyInput>();
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
-    //createLeftArm(entity);
-    //createRightArm(entity);
+    createLeftArm(entity);
+    createRightArm(entity);
 
     return entity;
 }
