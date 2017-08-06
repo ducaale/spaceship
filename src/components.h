@@ -33,7 +33,9 @@ struct CTransform : Component {
     float y() const { return position.y;  }
 
     sf::Vector2f getDirection() const {
-         return sf::Vector2f(cos(angle * PI / 180), sin(angle * PI / 180));
+        // in sfml y axis is upside down
+        // but angle rotates clockwise
+        return sf::Vector2f(-cos(angle * PI / 180), -sin(angle * PI / 180));
     }
 };
 
@@ -48,6 +50,10 @@ struct CPhysics : Component {
         acceleration(acceleration),
         velocity{0, 0}
     {}
+
+    void init() override {
+        cTransform = &entity->getComponent<CTransform>();
+    }
 
     void update(float elapsedTime) override {
         cTransform->position += velocity;
@@ -246,12 +252,39 @@ struct CTarget : Component {
 
 };
 
+struct CGun : Component {
+    Game *game;
+    sf::Sprite sprite;
+    float rateOfFire, speed;
+    int i = 0;
+
+    CGun(Game *game, sf::Sprite sprite, float rateOfFire, float speed) :
+        game(game),
+        sprite(sprite),
+        rateOfFire(rateOfFire),
+        speed(speed)
+    {}
+
+    void fire(sf::Vector2f& position, float angle) {
+        if(i++ == 0) {
+            auto& entity = game->manager.addEntity();
+            entity.addComponent<CTransform>(position, angle);
+            entity.addComponent<CSprite>(game, sprite);
+            entity.addComponent<CPhysics>(50.f, 50.f, 0.f);
+        }
+    }
+};
+
 struct CEnemyInput : Component {
 
     CAnimatedSprite *cSprite = nullptr;
+    CGun *cGun = nullptr;
+    CTransform *cTransform = nullptr;
 
     void init() override {
         cSprite = &entity->getComponent<CAnimatedSprite>();
+        cGun = &entity->getComponent<CGun>();
+        cTransform = &entity->getComponent<CTransform>();
     }
 
     void update(float elapsedTime) override {
@@ -263,8 +296,12 @@ struct CEnemyInput : Component {
             cSprite->sprite.stop();
             cSprite->play("openEyeAnimation");
         }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
+            cGun->fire(cTransform->position, cTransform->angle);
+        }
     }
 };
+
 
 #endif /* end of include guard: COMPONENTS_H_QD5OJVYS */
 

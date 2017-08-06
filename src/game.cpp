@@ -36,6 +36,7 @@ Entity& Game::createEnemy(Spaceship& target) {
     entity.getComponent<CAnimatedSprite>().sprite.setAnimation(openEyeAnimation);
 
 
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {256,384,64,32}), 0.f, 10.f);
     entity.addComponent<CEnemyInput>();
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 

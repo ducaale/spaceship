@@ -26,6 +26,7 @@ public:
     Entity& createRightArm(Entity& parent);
 
     Camera *camera = nullptr;
+    Manager manager;
 
 private:
     enum Groups : std::size_t {
@@ -41,8 +42,6 @@ private:
     sf::Time timeSlice = sf::milliseconds(16.f);
 
     sf::Event event;
-
-    Manager manager;
 
     // temporary
     Spaceship *spaceship = nullptr;
