@@ -2,6 +2,7 @@
 #define MANAGER_H
 
 #include <vector>
+#include <queue>
 #include <memory>
 #include <algorithm>
 
@@ -11,6 +12,8 @@ struct Manager {
 private:
     std::vector<std::unique_ptr<Entity>> entities;
     std::array<std::vector<Entity*>, maxGroups> groupedEntities;
+
+    std::queue<std::unique_ptr<Entity>> waitingEntities;
 
 public:
     void update(float elapsedTime) {
@@ -30,6 +33,11 @@ public:
     }
 
     void refresh() {
+        while(!waitingEntities.empty()) {
+            entities.push_back(std::move(waitingEntities.front()));
+            waitingEntities.pop();
+        }
+
         for(int i = 0; i < maxGroups; i++) {
             auto& v = groupedEntities[i];
             v.erase(
@@ -50,9 +58,10 @@ public:
 
     Entity& addEntity() {
         Entity* e = new Entity(*this);
-        std::unique_ptr<Entity> uPtr{e};
-        entities.emplace_back(std::move(uPtr));
 
+        std::unique_ptr<Entity> uPtr{e};
+        //entities.emplace_back(std::move(uPtr));
+        waitingEntities.emplace(std::move(uPtr));
         return *e;
     }
 };
