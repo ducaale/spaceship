@@ -45,10 +45,10 @@ struct CPhysics : Component {
     float maxSpeed, speed, acceleration;
 
     CPhysics(float maxSpeed, float speed, float acceleration) :
+        velocity{0, 0},
         maxSpeed(maxSpeed),
         speed(speed),
-        acceleration(acceleration),
-        velocity{0, 0}
+        acceleration(acceleration)
     {}
 
     void init() override {
@@ -256,35 +256,36 @@ struct CGun : Component {
     Game *game;
     sf::Sprite sprite;
     float rateOfFire, speed;
-    int i = 0;
+    float lastFired = 0.f;
 
     CGun(Game *game, sf::Sprite sprite, float rateOfFire, float speed) :
         game(game),
         sprite(sprite),
-        rateOfFire(rateOfFire),
+        rateOfFire(rateOfFire),  // bullets per second
         speed(speed)
     {}
 
-    void fire(sf::Vector2f& position, float angle) {
-        if(i++ == 0) {
+    void update(float elapsedTime) override {
+        lastFired += elapsedTime;
+    }
+
+    void fire(sf::Vector2f position, float angle) {
+        if(lastFired > 1/rateOfFire) {
             auto& entity = game->manager.addEntity();
             entity.addComponent<CTransform>(position, angle);
             entity.addComponent<CSprite>(game, sprite);
-            entity.addComponent<CPhysics>(50.f, 50.f, 0.f);
+            entity.addComponent<CPhysics>(speed, speed, 0.f);
+
+            lastFired = 0.f;
         }
     }
 };
 
 struct CEnemyInput : Component {
-
     CAnimatedSprite *cSprite = nullptr;
-    CGun *cGun = nullptr;
-    CTransform *cTransform = nullptr;
 
     void init() override {
         cSprite = &entity->getComponent<CAnimatedSprite>();
-        cGun = &entity->getComponent<CGun>();
-        cTransform = &entity->getComponent<CTransform>();
     }
 
     void update(float elapsedTime) override {
@@ -296,8 +297,31 @@ struct CEnemyInput : Component {
             cSprite->sprite.stop();
             cSprite->play("openEyeAnimation");
         }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
-            cGun->fire(cTransform->position, cTransform->angle);
+    }
+};
+
+struct COrbArmBehaviour: Component {
+
+    CGun *cGun = nullptr;
+    CTransform *cTransform = nullptr;
+    CParent *cParent = nullptr;
+
+    void init() override {
+        cGun = &entity->getComponent<CGun>();
+        cTransform = &entity->getComponent<CTransform>();
+        cParent = &entity->getComponent<CParent>();
+    }
+
+    void update(float elapsedTime) override {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
+
+            sf::Transform t = cParent->getTransform();
+            sf::Vector2f gunPos = cTransform->position;
+            gunPos.x -= 64.f;
+            sf::Vector2f globalPosition = t.transformPoint(gunPos);
+            float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
+
+            cGun->fire(globalPosition, globalAngle);
         }
     }
 };

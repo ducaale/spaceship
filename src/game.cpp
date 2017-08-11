@@ -35,8 +35,6 @@ Entity& Game::createEnemy(Spaceship& target) {
     entity.getComponent<CAnimatedSprite>().currentAnimation = "closeEyeAnimation";
     entity.getComponent<CAnimatedSprite>().sprite.setAnimation(openEyeAnimation);
 
-
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {256,384,64,32}), 0.f, 10.f);
     entity.addComponent<CEnemyInput>();
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
@@ -51,6 +49,8 @@ Entity& Game::createLeftArm(Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,-100.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,384,128,32}));
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {256,384,64,32}), 2.f, 200.f);
+    entity.addComponent<COrbArmBehaviour>();
 
     return entity;
 }
@@ -60,6 +60,8 @@ Entity& Game::createRightArm(Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,100.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,384,128,32}));
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {256,384,64,32}), 2.f, 200.f);
+    entity.addComponent<COrbArmBehaviour>();
 
     return entity;
 }
@@ -101,6 +103,7 @@ void Game::updatePhase() {
     for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
         spaceship->update(timeSlice);
         camera->update(timeSlice);
+        manager.refresh();
         manager.update(timeSlice.asSeconds());
     }
 }
