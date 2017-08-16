@@ -10,6 +10,7 @@
 #include "game.h"
 #include "component.h"
 #include "entity.h"
+#include "groups.h"
 
 #include "AnimatedSprite.hpp"
 
@@ -94,8 +95,8 @@ struct CSprite : Component {
 
     CSprite() = default;
     CSprite(Game* game, const sf::Sprite& sprite) :
-        sprite(sprite),
-        game(game)
+        game(game),
+        sprite(sprite)
     {
         width = sprite.getGlobalBounds().width;
         height = sprite.getGlobalBounds().height;
@@ -117,12 +118,9 @@ struct CSprite : Component {
         return t;
     }
 
-    void update(float elapsedTime) override {
+    void draw() override {
         sprite.setPosition(cTransform->position);
         sprite.setRotation(cTransform->angle);
-    }
-
-    void draw() override {
         if(cParent) {
             game->render(sprite, cParent->getTransform());
         }
@@ -145,8 +143,8 @@ struct CAnimatedSprite : Component {
 
     CAnimatedSprite() = default;
     CAnimatedSprite(Game* game, const AnimatedSprite& sprite, float width, float height) :
-        sprite(sprite),
         game(game),
+        sprite(sprite),
         width(width),
         height(height)
     {
@@ -273,8 +271,10 @@ struct CGun : Component {
         if(lastFired > 1/rateOfFire) {
             auto& entity = game->manager.addEntity();
             entity.addComponent<CTransform>(position, angle);
-            entity.addComponent<CSprite>(game, sprite);
             entity.addComponent<CPhysics>(speed, speed, 0.f);
+            entity.addComponent<CSprite>(game, sprite);
+
+            entity.addGroup(Groups::drawable);
 
             lastFired = 0.f;
         }

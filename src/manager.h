@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "entity.h"
+#include "groups.h"
 
 struct Manager {
 private:
@@ -14,18 +15,23 @@ private:
     std::array<std::vector<Entity*>, maxGroups> groupedEntities;
 
     std::queue<std::unique_ptr<Entity>> waitingEntities;
-
+    std::queue<std::pair<Entity*, Group>> waitingGroups;
 public:
+
     void update(float elapsedTime) {
         for(auto& e : entities) e->update(elapsedTime);
     }
 
     void draw() {
-        for(auto& e : entities) e->draw();
+        for(auto& e : groupedEntities[Groups::drawable]) e->draw();
     }
 
     void addToGroup(Entity* entity, Group group) {
         groupedEntities[group].emplace_back(entity);
+    }
+
+    void addToWaitingGroup(Entity* entity, Group group) {
+        waitingGroups.emplace(std::make_pair(entity, group));
     }
 
     std::vector<Entity*>& getEntitiesByGroup(Group group) {
@@ -36,6 +42,24 @@ public:
         while(!waitingEntities.empty()) {
             entities.push_back(std::move(waitingEntities.front()));
             waitingEntities.pop();
+        }
+
+        if(waitingGroups.size() > 0) {
+            while(!waitingGroups.empty()) {
+                Entity* entity;
+                Group group;
+
+                std::tie(entity, group) = waitingGroups.front();
+                addToGroup(entity, group);
+                waitingGroups.pop();
+            }
+
+            std::sort(
+                begin(groupedEntities[Groups::drawable]),
+                end(groupedEntities[Groups::drawable]),
+                [](const auto a, const auto b) -> bool {
+                    return a->getLayer() < b->getLayer();
+                });
         }
 
         for(int i = 0; i < maxGroups; i++) {
@@ -60,7 +84,6 @@ public:
         Entity* e = new Entity(*this);
 
         std::unique_ptr<Entity> uPtr{e};
-        //entities.emplace_back(std::move(uPtr));
         waitingEntities.emplace(std::move(uPtr));
         return *e;
     }
@@ -68,7 +91,7 @@ public:
 
 void Entity::addGroup(Group group) {
     groupBitset[group] = true;
-    manager.addToGroup(this, group);
+    manager.addToWaitingGroup(this, group);
 }
 
 #endif /* MANAGER_H */

@@ -22,6 +22,7 @@ private:
     Manager& manager;
 
     bool alive = true;
+    int layer = 0;
     std::vector<std::unique_ptr<Component>> components;
 
     ComponentArray componentArray;
@@ -40,6 +41,8 @@ public:
         for(auto& c : components) c->draw();
     }
 
+    int getLayer() const { return layer; }
+    void setLayer(int layer) { this->layer = layer; }
     bool isAlive() const { return alive; }
     void destroy() { alive = false; }
 
