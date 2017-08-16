@@ -2,9 +2,10 @@
 #include "spaceship.h"
 #include "camera.h"
 #include "components.h"
+#include "groups.h"
 #include <iostream>
 
-Entity& Game::createEnemy(Spaceship& target) {
+void Game::createEnemy(Spaceship& target) {
     auto& texture = resource["orb"];
     if(!texture.loadFromFile("../spritesheet/the_orb.png")) {
         std::cout << "unable to load file" << std::endl;
@@ -12,8 +13,6 @@ Entity& Game::createEnemy(Spaceship& target) {
     auto& entity = manager.addEntity();
     entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
 
-    //entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,0,128,128}));
-    //
     float width = 128.f;
     float height = 128.f;
     entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.8), true, false), width, height);
@@ -38,30 +37,61 @@ Entity& Game::createEnemy(Spaceship& target) {
     entity.addComponent<CEnemyInput>();
     entity.addComponent<CTarget>(target, 0.5f, 0.8f);
 
+    entity.addGroup(Groups::drawable);
+
     createLeftArm(entity);
     createRightArm(entity);
+    createRightRL(entity);
+    createLeftRL(entity);
+}
+
+Entity& Game::createRightArm(Entity& parent) {
+    auto& entity = manager.addEntity();
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-100.f));
+    entity.addComponent<CParent>(&parent);
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {384,128,128,32}));
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,64,32}), 2.f, 200.f);
+    entity.addComponent<COrbArmBehaviour>();
+
+    entity.addGroup(Groups::drawable);
 
     return entity;
 }
 
 Entity& Game::createLeftArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-100.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,100.f));
     entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,384,128,32}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {256,384,64,32}), 2.f, 200.f);
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {256,128,128,32}));
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,64,32}), 2.f, 200.f);
     entity.addComponent<COrbArmBehaviour>();
+
+    entity.addGroup(Groups::drawable);
 
     return entity;
 }
 
-Entity& Game::createRightArm(Entity& parent) {
+
+Entity& Game::createRightRL(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,100.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-32.f));
     entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,384,128,32}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {256,384,64,32}), 2.f, 200.f);
-    entity.addComponent<COrbArmBehaviour>();
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,128,32,64}));
+
+    entity.addGroup(Groups::drawable);
+    entity.setLayer(-1);
+
+    return entity;
+}
+
+Entity& Game::createLeftRL(Entity& parent) {
+    auto& entity = manager.addEntity();
+    entity.addComponent<CTransform>(sf::Vector2f(-1.5f,33.f));
+    entity.addComponent<CParent>(&parent);
+    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,128,32,64}));
+
+    entity.addGroup(Groups::drawable);
+    entity.setLayer(-1);
 
     return entity;
 }

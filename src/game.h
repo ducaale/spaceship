@@ -21,18 +21,17 @@ public:
     void drawPhase();
 
     void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
-    Entity& createEnemy(Spaceship& target);
+
+    void createEnemy(Spaceship& target);
     Entity& createLeftArm(Entity& parent);
     Entity& createRightArm(Entity& parent);
+    Entity& createLeftRL(Entity& parent);
+    Entity& createRightRL(Entity& parent);
 
     Camera *camera = nullptr;
     Manager manager;
 
 private:
-    enum Groups : std::size_t {
-        drawable
-    };
-
     sf::RenderWindow window{{800,600}, "Spaceship"};
     sf::View view{{0, 0,800, 600}};
 
