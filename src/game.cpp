@@ -50,7 +50,7 @@ Entity& Game::createRightArm(Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,-100.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {384,128,128,32}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,64,32}), 2.f, 200.f);
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
     entity.addComponent<COrbArmBehaviour>();
 
     entity.addGroup(Groups::drawable);
@@ -63,7 +63,7 @@ Entity& Game::createLeftArm(Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,100.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {256,128,128,32}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,64,32}), 2.f, 200.f);
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
     entity.addComponent<COrbArmBehaviour>();
 
     entity.addGroup(Groups::drawable);
