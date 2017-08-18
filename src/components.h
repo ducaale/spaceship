@@ -67,7 +67,7 @@ struct CPhysics : Component {
             speed = maxSpeed;
         }
     }
-    
+
     void deccelerate(float elapsedTime) {
         speed -= acceleration * elapsedTime;
         if(speed < 0) {
@@ -287,6 +287,38 @@ struct CGun : Component {
     }
 };
 
+struct CLaserGun : Component {
+    Game *game;
+    sf::Sprite sprite;
+    bool laserOn = false;
+
+    CLaserGun(Game *game, sf::Sprite sprite) :
+        game(game),
+        sprite(sprite)
+    {}
+
+    void update(float elapsedTime) override {
+    }
+
+    void openLaser() {
+        if(!laserOn) {
+            auto& firstPart = game->manager.addEntity();
+            firstPart.addComponent<CTransform>(sf::Vector2f(-256 - 64, 0));
+            firstPart.addComponent<CParent>(this->entity);
+            firstPart.addComponent<CSprite>(game, sprite);
+            firstPart.addGroup(Groups::drawable);
+
+            auto& secondPart = game->manager.addEntity();
+            secondPart.addComponent<CTransform>(sf::Vector2f((-256 - 64) * 2, 0));
+            secondPart.addComponent<CParent>(this->entity);
+            secondPart.addComponent<CSprite>(game, sprite);
+            secondPart.addGroup(Groups::drawable);
+
+            laserOn = true;
+        }
+    }
+};
+
 struct CEnemyInput : Component {
     CAnimatedSprite *cSprite = nullptr;
 
@@ -387,6 +419,20 @@ struct CRLBehaviour: Component {
                 closing = false;
                 open = false;
             }
+        }
+    }
+};
+
+struct COrbBehaviour : Component {
+    CLaserGun *cLaserGun = nullptr;
+
+    void init() override {
+        cLaserGun = &entity->getComponent<CLaserGun>();
+    }
+
+    void update(float elapsedTime) override {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
+            cLaserGun->openLaser();
         }
     }
 };
