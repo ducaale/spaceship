@@ -1,5 +1,5 @@
 CC:=clang++-3.9
-CFLAGS=-c -Wall -std=c++14
+CFLAGS=-Wall -std=c++14
 LDFLAGS=
 LIBS=-lsfml-graphics -lsfml-window -lsfml-system
 SOURCES=$(wildcard *.cpp)
@@ -11,9 +11,12 @@ all: $(SOURCES) $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS) 
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
 
-.cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+-include $(OBJECTS:.o=.d)
+
+%.o: %.cpp
+	$(CC) -c $(CFLAGS) $*.cpp -o $*.o
+	$(CC) -MM $(CFLAGS) $*.cpp -o $*.d
 
 clean:
-	rm -f $(EXECUTABLE) *.o
+	rm -f $(EXECUTABLE) *.o *.d
 
