@@ -41,13 +41,13 @@ void Game::createEnemy(Spaceship& target) {
 
     createLeftArm(entity);
     createRightArm(entity);
-    createRightRL(entity);
+    createRightRL(entity, target);
     createLeftRL(entity);
 }
 
 Entity& Game::createRightArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-100.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-110.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {384,128,128,32}));
     entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
@@ -60,7 +60,7 @@ Entity& Game::createRightArm(Entity& parent) {
 
 Entity& Game::createLeftArm(Entity& parent) {
     auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,100.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,110.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {256,128,128,32}));
     entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
@@ -72,11 +72,13 @@ Entity& Game::createLeftArm(Entity& parent) {
 }
 
 
-Entity& Game::createRightRL(Entity& parent) {
+Entity& Game::createRightRL(Entity& parent, Spaceship& target) {
     auto& entity = manager.addEntity();
     entity.addComponent<CTransform>(sf::Vector2f(0.f,-32.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,128,32,64}));
+    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
+    entity.addComponent<CRLBehaviour>(target);
 
     entity.addGroup(Groups::drawable);
     entity.setLayer(-1);

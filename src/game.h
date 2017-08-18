@@ -26,7 +26,7 @@ public:
     Entity& createLeftArm(Entity& parent);
     Entity& createRightArm(Entity& parent);
     Entity& createLeftRL(Entity& parent);
-    Entity& createRightRL(Entity& parent);
+    Entity& createRightRL(Entity& parent, Spaceship& target);
 
     Camera *camera = nullptr;
     Manager manager;
