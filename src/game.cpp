@@ -15,7 +15,7 @@ void Game::createEnemy(Spaceship& target) {
 
     float width = 128.f;
     float height = 128.f;
-    entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.8), true, false), width, height);
+    entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.8), true, false), width/2, height/2);
     
     Animation openEyeAnimation;
     openEyeAnimation.setSpriteSheet(resource["orb"]);

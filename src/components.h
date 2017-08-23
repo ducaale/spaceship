@@ -17,9 +17,6 @@
 #include "spaceship.h" //temporary
 #include "utility.h"
 
-struct CParent;
-struct CSprite;
-
 struct CTransform : Component {
     sf::Vector2f position;
     float angle;
@@ -83,24 +80,33 @@ struct CParent : Component {
     sf::Transform getTransform();
 };
 
-struct CSprite : Component {
+
+template <class T>
+struct BaseSprite : Component {
     Game *game = nullptr;
     CTransform *cTransform = nullptr;
     CParent *cParent = nullptr;
 
-    sf::Sprite sprite;
-    std::vector<sf::IntRect> rects;
+    T sprite;
 
-    float width, height;
+    float centerX, centerY;
 
-    CSprite() = default;
-    CSprite(Game* game, const sf::Sprite& sprite) :
+    BaseSprite(Game* game, const T& sprite, float centerX, float centerY) :
+        game(game),
+        sprite(sprite),
+        centerX(centerX),
+        centerY(centerY)
+    {
+        this->sprite.setOrigin(centerX, centerY);
+    }
+
+    BaseSprite(Game* game, const sf::Sprite& sprite) :
         game(game),
         sprite(sprite)
     {
-        width = sprite.getGlobalBounds().width;
-        height = sprite.getGlobalBounds().height;
-        this->sprite.setOrigin(width/2, height/2);
+        centerX = sprite.getGlobalBounds().width / 2.f;
+        centerY = sprite.getGlobalBounds().height / 2.f;
+        this->sprite.setOrigin(centerX, centerY);
     }
 
     void init() override {
@@ -110,10 +116,14 @@ struct CSprite : Component {
         }
     }
 
-    sf::Transform getTransform() {
+
+    sf::Transform getTransform(bool origin=false) {
+
+        if(origin) return sprite.getTransform();
+
         sprite.setOrigin(0.f, 0.f);
         sf::Transform t = sprite.getTransform();
-        sprite.setOrigin(width/2.0f, height/2.0f);
+        sprite.setOrigin(centerX, centerY);
 
         return t;
     }
@@ -121,50 +131,35 @@ struct CSprite : Component {
     void draw() override {
         sprite.setPosition(cTransform->position);
         sprite.setRotation(cTransform->angle);
-        if(cParent) {
+
+        if(cParent)
             game->render(sprite, cParent->getTransform());
-        }
-        else {
+        else
             game->render(sprite);
-        }
     }
 };
 
-struct CAnimatedSprite : Component {
-    Game *game = nullptr;
-    CTransform *cTransform = nullptr;
-    CParent *cParent = nullptr;
+struct CSprite : BaseSprite<sf::Sprite> {
 
-    AnimatedSprite sprite;
+    std::vector<sf::IntRect> rects;
+
+    CSprite(Game* game, const sf::Sprite& sprite, float centerX, float centerY) :
+        BaseSprite<sf::Sprite>(game, sprite, centerX, centerY)
+    {}
+
+    CSprite(Game* game, const sf::Sprite& sprite) :
+        BaseSprite<sf::Sprite>(game, sprite)
+    {}
+};
+
+struct CAnimatedSprite  : BaseSprite<AnimatedSprite> {
+
     std::map<std::string, Animation> animations;
     std::string currentAnimation;
 
-    float width, height;
-
-    CAnimatedSprite() = default;
-    CAnimatedSprite(Game* game, const AnimatedSprite& sprite, float width, float height) :
-        game(game),
-        sprite(sprite),
-        width(width),
-        height(height)
-    {
-        this->sprite.setOrigin(width/2, height/2);
-    }
-
-    void init() override {
-        cTransform = &entity->getComponent<CTransform>();
-        if(entity->hasComponent<CParent>()) {
-            cParent = &entity->getComponent<CParent>();
-        }
-    }
-
-    sf::Transform getTransform() {
-        sprite.setOrigin(0.f, 0.f);
-        sf::Transform t = sprite.getTransform();
-        sprite.setOrigin(width/2.0f, height/2.0f);
-
-        return t;
-    }
+    CAnimatedSprite(Game* game, const AnimatedSprite& sprite, float centerX, float centerY) :
+        BaseSprite<AnimatedSprite>(game, sprite, centerX, centerY)
+    {}
 
     void play(const std::string animation) {
         sprite.play(animations[animation]);
@@ -172,20 +167,9 @@ struct CAnimatedSprite : Component {
 
     void update(float elapsedTime) override {
         sprite.update(sf::seconds(elapsedTime));
-
-        sprite.setPosition(cTransform->position);
-        sprite.setRotation(cTransform->angle);
-    }
-
-    void draw() override {
-        if(cParent) {
-            game->render(sprite, cParent->getTransform());
-        }
-        else {
-            game->render(sprite);
-        }
     }
 };
+
 
 sf::Transform CParent::getTransform() {
     if(parent->hasComponent<CSprite>()) {
