@@ -1,5 +1,5 @@
-CC:=clang++-3.9
-CFLAGS=-Wall -std=c++14
+CC:=clang++-4.0
+CFLAGS=-Wall -ggdb -std=c++1z
 LDFLAGS=
 LIBS=-lsfml-graphics -lsfml-window -lsfml-system
 SOURCES=$(wildcard *.cpp)
