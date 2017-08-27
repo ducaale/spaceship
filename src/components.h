@@ -14,7 +14,6 @@
 
 #include "AnimatedSprite.hpp"
 
-#include "spaceship.h" //temporary
 #include "utility.h"
 
 struct CTransform : Component {
@@ -90,23 +89,31 @@ struct BaseSprite : Component {
     T sprite;
 
     float centerX, centerY;
+    float scaleX, scaleY;
 
     BaseSprite(Game* game, const T& sprite, float centerX, float centerY) :
         game(game),
         sprite(sprite),
         centerX(centerX),
-        centerY(centerY)
+        centerY(centerY),
+        scaleX(1.f),
+        scaleY(1.f)
     {
         this->sprite.setOrigin(centerX, centerY);
+        this->sprite.setScale(scaleX, scaleY);
     }
 
     BaseSprite(Game* game, const sf::Sprite& sprite) :
         game(game),
-        sprite(sprite)
+        sprite(sprite),
+        scaleX(1.f),
+        scaleY(1.f)
     {
         centerX = sprite.getGlobalBounds().width / 2.f;
         centerY = sprite.getGlobalBounds().height / 2.f;
+
         this->sprite.setOrigin(centerX, centerY);
+        this->sprite.setScale(scaleX, scaleY);
     }
 
     void init() override {
@@ -117,31 +124,61 @@ struct BaseSprite : Component {
     }
 
 
-    sf::Transform getTransform(bool origin=false) {
+    void setScale(float scaleX, float scaleY) {
+        sprite.setScale(scaleX, scaleY);
 
-        if(origin) return sprite.getTransform();
+        this->scaleX = scaleX;
+        this->scaleY = scaleY;
+    }
 
-        sprite.setOrigin(0.f, 0.f);
-        sf::Transform t = sprite.getTransform();
-        sprite.setOrigin(centerX, centerY);
+    sf::Transform getTransform(bool origin=false, bool scale=false) {
 
-        return t;
+        sf::Transform transform;
+
+        if(origin && scale) {
+            transform = sprite.getTransform();
+            return transform;
+        }
+
+        else if(!origin && scale) {
+            sprite.setOrigin(0.f, 0.f);
+            transform = sprite.getTransform();
+            sprite.setOrigin(centerX, centerY);
+        }
+
+        else if(origin && !scale) {
+            sprite.setScale(1.f, 1.f);
+            transform = sprite.getTransform();
+            sprite.setScale(scaleX, scaleY);
+        }
+
+        else {
+            sprite.setOrigin(0.f, 0.f);
+            sprite.setScale(1.f, 1.f);
+
+            transform = sprite.getTransform();
+
+            sprite.setOrigin(centerX, centerY);
+            sprite.setScale(scaleX, scaleY);
+        }
+
+        return transform;
     }
 
     void draw() override {
-        sprite.setPosition(cTransform->position);
-        sprite.setRotation(cTransform->angle);
-
-        if(cParent)
+        if(cParent) {
             game->render(sprite, cParent->getTransform());
-        else
+        }
+        else {
             game->render(sprite);
+        }
     }
 };
 
 struct CSprite : BaseSprite<sf::Sprite> {
 
-    std::vector<sf::IntRect> rects;
+    // rect, origin, scale
+    std::map<std::string, std::tuple<sf::IntRect, sf::Vector2f, sf::Vector2f>> frames;
 
     CSprite(Game* game, const sf::Sprite& sprite, float centerX, float centerY) :
         BaseSprite<sf::Sprite>(game, sprite, centerX, centerY)
@@ -150,12 +187,30 @@ struct CSprite : BaseSprite<sf::Sprite> {
     CSprite(Game* game, const sf::Sprite& sprite) :
         BaseSprite<sf::Sprite>(game, sprite)
     {}
+
+    void changeFrame(const std::string frame) {
+
+        auto [ rect, origin, scale ] = frames[frame];
+        sprite.setTextureRect(rect);
+        sprite.setOrigin(origin);
+        sprite.setScale(scale);
+
+        scaleX = scale.x;
+        scaleY = scale.y;
+
+        centerX = origin.x;
+        centerY = origin.y;
+    }
+
+    void update(float elapsedTime) override {
+        sprite.setPosition(cTransform->position);
+        sprite.setRotation(cTransform->angle);
+    }
 };
 
 struct CAnimatedSprite  : BaseSprite<AnimatedSprite> {
 
     std::map<std::string, Animation> animations;
-    std::string currentAnimation;
 
     CAnimatedSprite(Game* game, const AnimatedSprite& sprite, float centerX, float centerY) :
         BaseSprite<AnimatedSprite>(game, sprite, centerX, centerY)
@@ -165,20 +220,17 @@ struct CAnimatedSprite  : BaseSprite<AnimatedSprite> {
         sprite.play(animations[animation]);
     }
 
+    void setAnimation(const std::string animation) {
+        sprite.setAnimation(animations[animation]);
+    }
+
     void update(float elapsedTime) override {
+        sprite.setPosition(cTransform->position);
+        sprite.setRotation(cTransform->angle);
+
         sprite.update(sf::seconds(elapsedTime));
     }
 };
-
-
-sf::Transform CParent::getTransform() {
-    if(parent->hasComponent<CSprite>()) {
-        return parent->getComponent<CSprite>().getTransform();
-    }
-    else {
-        return parent->getComponent<CAnimatedSprite>().getTransform();
-    }
-}
 
 
 /*
@@ -186,24 +238,27 @@ sf::Transform CParent::getTransform() {
  */
 struct CTarget : Component {
     CTransform *cTransform = nullptr;
+    Entity *target = nullptr;
+    Game *game = nullptr;
 
-    Spaceship& target;
     float turn_speed, accuracy;
     float least_accurate_aim = 30.0f;
 
-    CTarget(Spaceship& target, float turn_speed, float accuracy) :
-        target(target),
+    CTarget(Game *game, Group target_name, float turn_speed, float accuracy) :
+        game(game),
         turn_speed(turn_speed),
         accuracy(1.0 - accuracy)
-    {}
+    {
+        target = game->manager.getByGroup(target_name);
+    }
 
     void init() override {
         cTransform = &entity->getComponent<CTransform>();
     }
 
     void update(float elapsedTime) override {
-        float target_angle = atan2(cTransform->y() - target.getCoordinate().y,
-                cTransform->x() - target.getCoordinate().x) * 180 / PI;
+        float target_angle = atan2(cTransform->y() - target->getComponent<CTransform>().y(),
+                cTransform->x() - target->getComponent<CTransform>().x()) * 180 / PI;
 
         float facing_angle = cTransform->angle;
 
@@ -234,6 +289,20 @@ struct CTarget : Component {
 
 };
 
+struct CTimerKiller : Component {
+
+    float counter = 0;
+    float end;
+
+    CTimerKiller(float end) : end(end) {}
+
+    void update(float elapsedTime) override {
+        counter += elapsedTime;
+
+        if(counter > end) entity->destroy();
+    }
+};
+
 struct CGun : Component {
     Game *game;
     sf::Sprite sprite;
@@ -252,15 +321,16 @@ struct CGun : Component {
         lastFired += elapsedTime;
     }
 
-    void fire(sf::Vector2f position, float angle, Spaceship* target=nullptr) {
+    void fire(sf::Vector2f position, float angle, Group target_name=0) {
         if(lastFired > 1/rateOfFire) {
             auto& entity = game->manager.addEntity();
             entity.addComponent<CTransform>(position, angle);
             entity.addComponent<CPhysics>(speed, speed, 0.f);
             entity.addComponent<CSprite>(game, sprite);
+            entity.addComponent<CTimerKiller>(5);
 
-            if(target) {
-                entity.addComponent<CTarget>(*target, 0.5f, 0.8f);
+            if(target_name) {
+                entity.addComponent<CTarget>(game, target_name, 0.5f, 0.8f);
             }
 
             entity.addGroup(Groups::drawable);
@@ -302,6 +372,7 @@ struct CLaserGun : Component {
         }
     }
 };
+
 
 struct CEnemyInput : Component {
     CAnimatedSprite *cSprite = nullptr;
@@ -352,13 +423,10 @@ struct CRLBehaviour: Component {
     CTransform *cTransform = nullptr;
     CParent *cParent = nullptr;
     CGun *cGun = nullptr;
-    Spaceship& target;
 
     bool opening = false;
     bool closing = false;
     bool open = false;
-
-    CRLBehaviour(Spaceship& target) : target(target) {}
 
     void init() override {
         cTransform = &entity->getComponent<CTransform>();
@@ -385,7 +453,7 @@ struct CRLBehaviour: Component {
             sf::Vector2f globalPosition = t.transformPoint(gunPos);
             float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
 
-            cGun->fire(globalPosition, globalAngle, &target);
+            cGun->fire(globalPosition, globalAngle, Groups::player);
         }
 
         if(opening) {

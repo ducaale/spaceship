@@ -7,7 +7,6 @@
 #include "manager.h"
 #include <map>
 
-class Spaceship;
 class Camera;
 
 class Game {
@@ -22,14 +21,19 @@ public:
 
     void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
 
-    void createEnemy(Spaceship& target);
+    void loadResources();
+
+    void createEnemy();
     Entity& createLeftArm(Entity& parent);
     Entity& createRightArm(Entity& parent);
     Entity& createLeftRL(Entity& parent);
-    Entity& createRightRL(Entity& parent, Spaceship& target);
+    Entity& createRightRL(Entity& parent);
 
     Camera *camera = nullptr;
+
     Manager manager;
+
+    std::map<std::string, sf::Texture> resource;
 
 private:
     sf::RenderWindow window{{800,600}, "Spaceship"};
@@ -41,10 +45,6 @@ private:
     sf::Time timeSlice = sf::milliseconds(16.f);
 
     sf::Event event;
-
-    // temporary
-    Spaceship *spaceship = nullptr;
-    std::map<std::string, sf::Texture> resource;
 };
 
 #endif /* GAME_H */

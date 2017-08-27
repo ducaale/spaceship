@@ -2,6 +2,8 @@
 #define GROUPS_H
 
 enum Groups : std::size_t {
+    none,
+    player,
     drawable
 };
 

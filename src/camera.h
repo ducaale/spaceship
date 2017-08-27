@@ -4,18 +4,20 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-class Spaceship;
-class TheOrb;
+#include "entity.h"
+#include "components.h"
+#include "manager.h"
 
 class Camera {
 public:
-    Camera(Spaceship *spaceship);
+    Camera(Manager& manager);
     void update(sf::Time elapsedTime);
     sf::Vector2f getCoordinate();
 private:
     sf::Vector2f coordinate;
     sf::Vector2f offset;
-    Spaceship *spaceship;
+
+    Entity* player = nullptr;
 
 };
 

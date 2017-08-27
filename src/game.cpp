@@ -1,22 +1,35 @@
 #include "game.h"
-#include "spaceship.h"
+
 #include "camera.h"
+
 #include "components.h"
 #include "groups.h"
 #include <iostream>
 
-void Game::createEnemy(Spaceship& target) {
-    auto& texture = resource["orb"];
-    if(!texture.loadFromFile("../spritesheet/the_orb.png")) {
+#include "player.h"
+
+void Game::loadResources() {
+    sf::Texture *texture;
+
+    texture = &resource["orb"];
+    if(!texture->loadFromFile("../spritesheet/the_orb.png")) {
         std::cout << "unable to load file" << std::endl;
     }
+
+    texture  = &resource["player"];
+    if(!texture->loadFromFile("../spritesheet/player_ship.png")) {
+        std::cout << "unable to load file" << std::endl;
+    }
+}
+
+void Game::createEnemy() {
     auto& entity = manager.addEntity();
     entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
 
     float width = 128.f;
     float height = 128.f;
     entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.8), true, false), width/2, height/2);
-    
+
     Animation openEyeAnimation;
     openEyeAnimation.setSpriteSheet(resource["orb"]);
     for(int i = 0; i < 4; i++) {
@@ -31,11 +44,11 @@ void Game::createEnemy(Spaceship& target) {
 
     entity.getComponent<CAnimatedSprite>().animations["openEyeAnimation"] = openEyeAnimation;
     entity.getComponent<CAnimatedSprite>().animations["closeEyeAnimation"] = closeEyeAnimation;
-    entity.getComponent<CAnimatedSprite>().currentAnimation = "closeEyeAnimation";
-    entity.getComponent<CAnimatedSprite>().sprite.setAnimation(openEyeAnimation);
+
+    entity.getComponent<CAnimatedSprite>().setAnimation("openEyeAnimation");
 
     entity.addComponent<CEnemyInput>();
-    entity.addComponent<CTarget>(target, 0.5f, 0.8f);
+    entity.addComponent<CTarget>(this, Groups::player, 0.5f, 0.8f);
 
     entity.addComponent<CLaserGun>(this, sf::Sprite(resource["orb"], {0,224,512,32}));
     entity.addComponent<COrbBehaviour>();
@@ -44,7 +57,7 @@ void Game::createEnemy(Spaceship& target) {
 
     createLeftArm(entity);
     createRightArm(entity);
-    createRightRL(entity, target);
+    createRightRL(entity);
     createLeftRL(entity);
 }
 
@@ -75,13 +88,13 @@ Entity& Game::createLeftArm(Entity& parent) {
 }
 
 
-Entity& Game::createRightRL(Entity& parent, Spaceship& target) {
+Entity& Game::createRightRL(Entity& parent) {
     auto& entity = manager.addEntity();
     entity.addComponent<CTransform>(sf::Vector2f(0.f,-32.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,128,32,64}));
     entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
-    entity.addComponent<CRLBehaviour>(target);
+    entity.addComponent<CRLBehaviour>();
 
     entity.addGroup(Groups::drawable);
     entity.setLayer(-1);
@@ -102,14 +115,15 @@ Entity& Game::createLeftRL(Entity& parent) {
 }
 
 Game::Game() {
-    spaceship = new Spaceship(window);
-    camera = new Camera(spaceship);
 
-    createEnemy(*spaceship);
-    //sf::Texture texture;
-    //texture.loadFromFile("../background/nebula.png");
-    //sf::Sprite background(texture);
-    //background.setScale(1/1.28f, 1/1.28f);
+    loadResources();
+
+    createPlayer(this);
+    manager.refresh();
+
+    createEnemy();
+
+    camera = new Camera(manager);
 }
 
 void Game::run() {
@@ -135,8 +149,7 @@ void Game::inputPhase() {
 
 void Game::updatePhase() {
     simulationTime = sf::seconds(0.f);
-    for(; simulationTime <= elapsedTime; simulationTime += timeSlice) {
-        spaceship->update(timeSlice);
+    for(int i = 0; simulationTime <= elapsedTime && i < 10; simulationTime += timeSlice, i++) {
         camera->update(timeSlice);
         manager.refresh();
         manager.update(timeSlice.asSeconds());
@@ -144,10 +157,8 @@ void Game::updatePhase() {
 }
 
 void Game::drawPhase() {
-    //window.draw(background);
     view.setCenter(camera->getCoordinate());
     window.setView(view);
-    spaceship->draw();
     manager.draw();
     window.display();
 }

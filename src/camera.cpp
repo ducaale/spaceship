@@ -1,19 +1,19 @@
 #include "camera.h"
 #include "utility.h"
-#include "spaceship.h"
-#include <iostream>
 
-Camera::Camera(Spaceship *spaceship):
-    coordinate(spaceship->getCoordinate()),
-    offset(0.f, 0.f),
-    spaceship(spaceship)
-{}
+#include "groups.h"
+
+Camera::Camera(Manager& manager):
+    offset(0.f, 0.f)
+{
+    player = manager.getByGroup(Groups::player);
+}
 
 void Camera::update(sf::Time elapsedTime) {
 
-    offset = spaceship->getDirection() * 150.f;
+    offset = player->getComponent<CTransform>().getDirection() * 150.f;
     coordinate = utility::lerp(0.02, coordinate,
-            spaceship->getCoordinate() + offset + (spaceship->getVelocity() * 80.f));
+            player->getComponent<CTransform>().position + offset + (player->getComponent<CPhysics>().velocity * 80.f));
 }
 
 

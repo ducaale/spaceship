@@ -25,7 +25,6 @@
 
 Animation::Animation() : m_texture(NULL)
 {
-
 }
 
 void Animation::addFrame(sf::IntRect rect)

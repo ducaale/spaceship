@@ -38,6 +38,10 @@ public:
         return groupedEntities[group];
     }
 
+    Entity* getByGroup(Group group) {
+        return groupedEntities[group][0];
+    }
+
     void refresh() {
         while(!waitingEntities.empty()) {
             entities.push_back(std::move(waitingEntities.front()));
@@ -46,10 +50,8 @@ public:
 
         if(waitingGroups.size() > 0) {
             while(!waitingGroups.empty()) {
-                Entity* entity;
-                Group group;
 
-                std::tie(entity, group) = waitingGroups.front();
+                auto [entity, group] = waitingGroups.front();
                 addToGroup(entity, group);
                 waitingGroups.pop();
             }
@@ -88,10 +90,5 @@ public:
         return *e;
     }
 };
-
-void Entity::addGroup(Group group) {
-    groupBitset[group] = true;
-    manager.addToWaitingGroup(this, group);
-}
 
 #endif /* MANAGER_H */

@@ -12,22 +12,19 @@
 struct Component;
 class Entity;
 
+
 using ComponentID = std::size_t;
 
-ComponentID getUniqueComponentID() {
-    static ComponentID lastID = 0u;
-    return lastID++;
-}
+inline ComponentID lastID = 0u;
 
 template <typename T>
 ComponentID getComponentTypeID() {
     static_assert(std::is_base_of<Component, T>::value,
             "T must inherit from Component");
 
-    static ComponentID typeID = getUniqueComponentID();
+    static ComponentID typeID = lastID++;
     return typeID;
 }
-
 
 struct Component {
     Entity* entity;
