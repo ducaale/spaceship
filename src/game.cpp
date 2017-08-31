@@ -1,13 +1,15 @@
-#include "game.h"
+#include <iostream>
 
-#include "camera.h"
+#include "game.h"
 
 #include "components.h"
 #include "collision.h"
 #include "groups.h"
-#include <iostream>
+
+#include "camera.h"
 
 #include "player.h"
+#include "orb.h"
 
 void Game::loadResources() {
     sf::Texture *texture;
@@ -23,106 +25,12 @@ void Game::loadResources() {
     }
 }
 
-void Game::createEnemy() {
-    auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
-
-    float width = 128.f;
-    float height = 128.f;
-    entity.addComponent<CAnimatedSprite>(this, AnimatedSprite(sf::seconds(0.8), true, false), width/2, height/2);
-
-    Animation openEyeAnimation;
-    openEyeAnimation.setSpriteSheet(resource["orb"]);
-    for(int i = 0; i < 4; i++) {
-        openEyeAnimation.addFrame(sf::IntRect(width * i, 0, width, height));
-    }
-
-    Animation closeEyeAnimation;
-    closeEyeAnimation.setSpriteSheet(resource["orb"]);
-    for(int i = 3; i > -1; i--) {
-        closeEyeAnimation.addFrame(sf::IntRect(width * i, 0, width, height));
-    }
-
-    entity.getComponent<CAnimatedSprite>().animations["openEyeAnimation"] = openEyeAnimation;
-    entity.getComponent<CAnimatedSprite>().animations["closeEyeAnimation"] = closeEyeAnimation;
-
-    entity.getComponent<CAnimatedSprite>().setAnimation("openEyeAnimation");
-
-    entity.addComponent<CEnemyInput>();
-    entity.addComponent<CTarget>(this, Groups::player, 0.5f, 0.8f);
-
-    entity.addComponent<CLaserGun>(this, sf::Sprite(resource["orb"], {0,224,512,32}));
-    entity.addComponent<COrbBehaviour>();
-
-    entity.addGroup(Groups::drawable);
-
-    createLeftArm(entity);
-    createRightArm(entity);
-    createRightRL(entity);
-    createLeftRL(entity);
-}
-
-Entity& Game::createRightArm(Entity& parent) {
-    auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-110.f));
-    entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {384,128,128,32}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 3.f, 200.f);
-    entity.addComponent<COrbArmBehaviour>();
-
-    entity.addGroup(Groups::drawable);
-
-    return entity;
-}
-
-Entity& Game::createLeftArm(Entity& parent) {
-    auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,110.f));
-    entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {256,128,128,32}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
-    entity.addComponent<COrbArmBehaviour>();
-
-    entity.addGroup(Groups::drawable);
-
-    return entity;
-}
-
-
-Entity& Game::createRightRL(Entity& parent) {
-    auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-32.f));
-    entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {0,128,32,64}));
-    entity.addComponent<CGun>(this, sf::Sprite(resource["orb"], {0,256,32,16}), 2.f, 200.f);
-    entity.addComponent<CRLBehaviour>();
-
-    entity.addGroup(Groups::drawable);
-    entity.setLayer(-1);
-
-    return entity;
-}
-
-Entity& Game::createLeftRL(Entity& parent) {
-    auto& entity = manager.addEntity();
-    entity.addComponent<CTransform>(sf::Vector2f(-1.5f,33.f));
-    entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(this, sf::Sprite(resource["orb"], {128,128,32,64}));
-
-    entity.addGroup(Groups::drawable);
-    entity.setLayer(-1);
-
-    return entity;
-}
-
 Game::Game() {
 
     loadResources();
 
     createPlayer(this);
-    manager.refresh();
-
-    createEnemy();
+    createOrb(this);
 
     camera = new Camera(manager);
 }

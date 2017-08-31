@@ -86,7 +86,6 @@ struct CThruster : Component {
     }
 };
 
-
 void createThruster(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
@@ -138,6 +137,8 @@ void createPlayer(Game *game) {
     entity.addGroup(Groups::player);
 
     createThruster(game, entity);
+
+    game->manager.refresh();
 }
 
 

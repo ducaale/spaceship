@@ -23,14 +23,7 @@ public:
 
     void loadResources();
 
-    void createEnemy();
-    Entity& createLeftArm(Entity& parent);
-    Entity& createRightArm(Entity& parent);
-    Entity& createLeftRL(Entity& parent);
-    Entity& createRightRL(Entity& parent);
-
     Camera *camera = nullptr;
-
     Manager manager;
 
     std::map<std::string, sf::Texture> resource;
