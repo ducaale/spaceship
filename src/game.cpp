@@ -2,11 +2,10 @@
 
 #include "game.h"
 
+#include "camera.h"
 #include "components.h"
 #include "collision.h"
 #include "groups.h"
-
-#include "camera.h"
 
 #include "player.h"
 #include "orb.h"
@@ -32,7 +31,7 @@ Game::Game() {
     createPlayer(this);
     createOrb(this);
 
-    camera = new Camera(manager);
+    camera = new Camera(manager, window);
 }
 
 void Game::run() {
@@ -59,15 +58,13 @@ void Game::inputPhase() {
 void Game::updatePhase() {
     simulationTime = sf::seconds(0.f);
     for(int i = 0; simulationTime <= elapsedTime && i < 10; simulationTime += timeSlice, i++) {
-        camera->update(timeSlice);
         manager.refresh();
+        camera->update(timeSlice.asSeconds());
         manager.update(timeSlice.asSeconds());
     }
 }
 
 void Game::drawPhase() {
-    view.setCenter(camera->getCoordinate());
-    window.setView(view);
     manager.draw();
     window.display();
 }
