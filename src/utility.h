@@ -10,7 +10,9 @@ constexpr double PI = 3.14159265;
 
 namespace utility {
 
-    sf::Vector2f normalize(const sf::Vector2f &source);
+    sf::Vector2f normalize(const sf::Vector2f& source);
+
+    float dotProduct(const sf::Vector2f& v1, const sf::Vector2f& v2);
 
     float magnitude(sf::Vector2f point, sf::Vector2f origin);
 

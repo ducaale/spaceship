@@ -76,7 +76,7 @@ struct CParent : Component {
     Entity *parent = nullptr;
     CParent(Entity *entity) : parent(entity) {}
 
-    sf::Transform getTransform();
+    sf::Transform getTransform(bool origin=false, bool scale=false);
 };
 
 
@@ -129,6 +129,14 @@ struct BaseSprite : Component {
 
         this->scaleX = scaleX;
         this->scaleY = scaleY;
+    }
+
+    float width() {
+        return sprite.getLocalBounds().width;
+    }
+
+    float height() {
+        return sprite.getLocalBounds().height;
     }
 
     sf::Transform getTransform(bool origin=false, bool scale=false) {

@@ -3,6 +3,7 @@
 #include "camera.h"
 
 #include "components.h"
+#include "collision.h"
 #include "groups.h"
 #include <iostream>
 

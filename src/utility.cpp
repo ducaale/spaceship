@@ -12,6 +12,10 @@ namespace utility {
             return source;
     }
 
+    float dotProduct(const sf::Vector2f& v1, const sf::Vector2f& v2) {
+        return (v1.x * v2.x) + (v1.y * v2.y);
+    }
+
     float magnitude(sf::Vector2f point, sf::Vector2f origin = sf::Vector2f(0.f,0.f)) {
        return sqrt( pow((point.x - origin.x), 2) + pow((point.y - origin.y), 2) );
     }
