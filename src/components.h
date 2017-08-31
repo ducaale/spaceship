@@ -79,7 +79,6 @@ struct CParent : Component {
     sf::Transform getTransform(bool origin=false, bool scale=false);
 };
 
-
 template <class T>
 struct BaseSprite : Component {
     Game *game = nullptr;
@@ -239,7 +238,6 @@ struct CAnimatedSprite  : BaseSprite<AnimatedSprite> {
         sprite.update(sf::seconds(elapsedTime));
     }
 };
-
 
 /*
  * https://gist.github.com/JISyed/6445974

@@ -1,3 +1,7 @@
+/*
+ * https://github.com/SuperV1234/Tutorials/blob/master/DiveIntoC%2B%2B11/5_Entities/p8.cpp
+ */
+
 #ifndef COMPONENT_H_PGUVQNWZ
 #define COMPONENT_H_PGUVQNWZ
 
