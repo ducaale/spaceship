@@ -1,3 +1,7 @@
+/*
+ * reference url: https://www.gamedev.net/articles/programming/general-and-gameplay-programming/2d-rotated-rectangle-collision-r2604
+ */
+
 #ifndef COLLISION_H
 #define COLLISION_H
 
@@ -30,10 +34,14 @@ void getVertices(Entity& e, std::array<sf::Vector2f, 4>& entity_vertices) {
     entity_vertices[3] = t.transformPoint(0.f, height);
 }
 
-void getAxis(std::array<sf::Vector2f, 4>& entity_vertices, std::array<sf::Vector2f, 4>& entity_axis) {
-    for(int i = 0; i < 4; i++) {
-        entity_axis[i] = entity_vertices[i] - entity_vertices[(i + 1) % 4];
-    }
+void getAxis(std::array<sf::Vector2f, 4>& vertices1, std::array<sf::Vector2f, 4>& vertices2, std::array<sf::Vector2f, 4>& axis) {
+    //entity1 axis
+    axis[0] = vertices1[1] - vertices1[0];
+    axis[1] = vertices1[1] - vertices1[2];
+
+    //entity2 axis
+    axis[2] = vertices2[1] - vertices2[0];
+    axis[3] = vertices2[1] - vertices2[2];
 }
 
 /*
@@ -46,7 +54,7 @@ std::pair<int, int> projVectToAxis(const sf::Vector2f& entity_axis, std::array<s
     int max = utility::dotProduct(entity_vertices[0], entity_axis);
     int scalar_value;
     for(int i = 1; i < 4; i++) {
-        scalar_value = utility::dotProduct(entity_vertices[0], entity_axis);
+        scalar_value = utility::dotProduct(entity_vertices[i], entity_axis);
         if(scalar_value > max) max = scalar_value;
         if(scalar_value < min) min = scalar_value;
     }
@@ -55,12 +63,10 @@ std::pair<int, int> projVectToAxis(const sf::Vector2f& entity_axis, std::array<s
 }
 
 bool overlap(float min1, float max1, float min2, float max2) {
-    if(min1 >= min2 && min1 <= max2)
-        return true;
-    else if(max1 >= min2 && max1 <= max2)
-        return true;
+    if(max1 < min2 || max2 < min1)
+        return false;
 
-    return false;
+    return true;
 }
 
 
@@ -73,19 +79,10 @@ bool test_collision(Entity& e1, Entity& e2) {
     getVertices(e1, entity1_vertices);
     getVertices(e2, entity2_vertices);
 
-    std::array<sf::Vector2f, 4> entity1_axis, entity2_axis;
-    getAxis(entity1_vertices, entity1_axis);
-    getAxis(entity2_vertices, entity2_axis);
+    std::array<sf::Vector2f, 4> entity_axis;
+    getAxis(entity1_vertices, entity2_vertices, entity_axis);
     
-    // first entity axis
-    for(auto& axis : entity1_axis) {
-        auto [min1, max1] = projVectToAxis(axis, entity1_vertices);
-        auto [min2, max2] = projVectToAxis(axis, entity2_vertices);
-        if(!overlap(min1, max1, min2, max2)) return false;
-    }
-
-    // second entity axis
-    for(auto& axis : entity2_axis) {
+    for(auto& axis : entity_axis) {
         auto [min1, max1] = projVectToAxis(axis, entity1_vertices);
         auto [min2, max2] = projVectToAxis(axis, entity2_vertices);
         if(!overlap(min1, max1, min2, max2)) return false;
