@@ -13,13 +13,14 @@ public:
     void update(float elapsedTime);
 
 private:
+    Manager& manager;
+
     sf::RenderWindow& window;
     sf::View view{{0, 0,800, 600}};
 
     sf::Vector2f coordinate;
+    sf::Vector2f scale;
     sf::Vector2f offset;
-
-    Entity* player = nullptr;
 };
 
 #endif /* CAMERA_H */

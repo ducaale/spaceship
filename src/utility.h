@@ -16,9 +16,12 @@ namespace utility {
 
     float magnitude(sf::Vector2f point, sf::Vector2f origin);
 
+    float distance(const sf::Vector2f& p1, const sf::Vector2f& p2);
+
     sf::Vector2f rotatePoint(sf::Vector2f point, sf::Vector2f origin, float angle);
 
     sf::Vector2f lerp(float t, const sf::Vector2f &a, const sf::Vector2f &b);
+
     float lerp(float t, float a, float b);
 
     float clamp(float n, float lower, float upper);
