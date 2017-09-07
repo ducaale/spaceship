@@ -61,6 +61,7 @@ void Game::updatePhase() {
         manager.refresh();
         camera->update(timeSlice.asSeconds());
         manager.update(timeSlice.asSeconds());
+        checkCollision();
     }
 }
 
@@ -71,6 +72,26 @@ void Game::drawPhase() {
 
 void Game::render(const sf::Drawable& drawable, const sf::Transform& t) {
     window.draw(drawable, t);
+}
+
+void Game::checkCollision() {
+    auto& collidables = manager.getEntitiesByGroup(Groups::collidable);
+
+    for(std::size_t i = 0; i < collidables.size() - 1; i++) {
+        for(std::size_t j = i + 1; j < collidables.size(); j++) {
+
+            if(collidables[i]->hasGroup(Groups::enemy_bullet) && collidables[j]->hasGroup(Groups::enemy)) continue;
+            if(collidables[i]->hasGroup(Groups::enemy) && collidables[j]->hasGroup(Groups::enemy_bullet)) continue;
+
+            if(collidables[i]->hasGroup(Groups::player_bullet) && collidables[j]->hasGroup(Groups::player)) continue;
+            if(collidables[i]->hasGroup(Groups::player) && collidables[j]->hasGroup(Groups::player_bullet)) continue;
+
+            if(test_collision(*collidables[i], *collidables[j])) {
+                if(collidables[i]->hasGroup(Groups::bullet)) collidables[i]->destroy();
+                if(collidables[j]->hasGroup(Groups::bullet)) collidables[j]->destroy();
+            }
+        }
+    }
 }
 
 int main() {

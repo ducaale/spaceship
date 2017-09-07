@@ -20,6 +20,8 @@ public:
     void inputPhase();
     void drawPhase();
 
+    void checkCollision();
+
     void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
 
     void loadResources();

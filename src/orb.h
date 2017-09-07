@@ -170,10 +170,15 @@ Entity& createRightArm(Game *game, Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,-110.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 3.f, 200.f);
+    auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
+    cSprite.setScale(scaleX, scaleY);
+
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::enemy_bullet);
     entity.addComponent<COrbArmBehaviour>();
 
     entity.addGroup(Groups::drawable);
+    entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::enemy);
 
     return entity;
 }
@@ -184,10 +189,15 @@ Entity& createLeftArm(Game *game, Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,110.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 2.f, 200.f);
+    auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
+    cSprite.setScale(scaleX, scaleY);
+
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::enemy_bullet);
     entity.addComponent<COrbArmBehaviour>();
 
     entity.addGroup(Groups::drawable);
+    entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::enemy);
 
     return entity;
 }
@@ -198,10 +208,12 @@ Entity& createRightRL(Game *game, Entity& parent) {
     entity.addComponent<CTransform>(sf::Vector2f(0.f,-32.f));
     entity.addComponent<CParent>(&parent);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 2.f, 200.f);
+    auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
     entity.addComponent<CRLBehaviour>();
 
     entity.addGroup(Groups::drawable);
+    entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::enemy);
     entity.setLayer(-1);
 
     return entity;
@@ -215,6 +227,8 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {128,128,32,64}));
 
     entity.addGroup(Groups::drawable);
+    entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::enemy);
     entity.setLayer(-1);
 
     return entity;
@@ -247,6 +261,8 @@ void createOrb(Game *game) {
     entity.addComponent<COrbBehaviour>();
 
     entity.addGroup(Groups::drawable);
+    entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::enemy);
 
     createLeftArm(game, entity);
     createRightArm(game, entity);

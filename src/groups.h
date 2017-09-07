@@ -4,7 +4,12 @@
 enum Groups : std::size_t {
     none,
     player,
-    drawable
+    bullet,
+    player_bullet,
+    enemy_bullet,
+    enemy,
+    drawable,
+    collidable
 };
 
 #endif /* GROUPS_H */

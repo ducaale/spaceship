@@ -380,12 +380,14 @@ struct CGun : Component {
     float rateOfFire, speed;
     float lastFired = 0.f;
     int projShot = 0;
+    Group group;
 
-    CGun(Game *game, sf::Sprite sprite, float rateOfFire, float speed) :
+    CGun(Game *game, sf::Sprite sprite, float rateOfFire, float speed, Group group) :
         game(game),
         sprite(sprite),
         rateOfFire(rateOfFire),  // bullets per second
-        speed(speed)
+        speed(speed),
+        group(group)
     {}
 
     void update(float elapsedTime) override {
@@ -406,6 +408,9 @@ struct CGun : Component {
             }
 
             entity.addGroup(Groups::drawable);
+            entity.addGroup(Groups::collidable);
+            entity.addGroup(Groups::bullet);
+            entity.addGroup(group);
 
             lastFired = 0.f;
             ++projShot;
