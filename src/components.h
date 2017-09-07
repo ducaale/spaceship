@@ -260,6 +260,8 @@ struct CTarget : Component {
     float turn_speed, accuracy;
     float least_accurate_aim = 30.0f;
 
+    bool targetOn = true;
+
     CTarget(Game *game, Group target_name, float turn_speed, float accuracy) :
         game(game),
         turn_speed(turn_speed),
@@ -272,7 +274,17 @@ struct CTarget : Component {
         cTransform = &entity->getComponent<CTransform>();
     }
 
+    void disableTargeting() {
+        targetOn = false;
+    }
+
+    void enableTargeting() {
+        targetOn = true;
+    }
+
     void update(float elapsedTime) override {
+        if(!targetOn) return;
+
         float target_angle = atan2(cTransform->y() - target->getComponent<CTransform>().y(),
                 cTransform->x() - target->getComponent<CTransform>().x()) * 180 / PI;
 
