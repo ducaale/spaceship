@@ -312,6 +312,49 @@ struct CTimerKiller : Component {
     }
 };
 
+struct CGradualTransparency : Component {
+    CSprite *cSprite;
+
+    void init() override {
+        cSprite = &entity->getComponent<CSprite>();
+    }
+
+    void update(float elapsedTime) override {
+        auto color = cSprite->sprite.getColor();
+        color.a = utility::clamp(color.a - 0.001 * elapsedTime, 0, 255);
+        cSprite->sprite.setColor(color);
+    }
+};
+
+struct CPathTrail : Component {
+    Game *game;
+    sf::Sprite sprite;
+    CTransform *cTransform = nullptr;
+
+    CPathTrail(Game *game, sf::Sprite sprite) :
+        game(game),
+        sprite(sprite)
+    {}
+
+    void init() override {
+        cTransform = &entity->getComponent<CTransform>();
+    }
+
+    void update(float elapsedTime) override {
+        auto& entity = game->manager.addEntity();
+
+        entity.addComponent<CTransform>(cTransform->position, cTransform->angle);
+
+        auto& cSprite = entity.addComponent<CSprite>(game, sprite);
+        cSprite.sprite.setColor(sf::Color(128, 128, 128, 50));
+
+        entity.addComponent<CGradualTransparency>();
+        entity.addComponent<CTimerKiller>(6.f);
+        entity.setLayer(-2);
+        entity.addGroup(Groups::drawable);
+    }
+};
+
 struct CGun : Component {
     Game *game;
     sf::Sprite sprite;
@@ -339,7 +382,8 @@ struct CGun : Component {
             entity.addComponent<CTimerKiller>(5);
 
             if(target_name) {
-                entity.addComponent<CTarget>(game, target_name, 0.5f, 0.8f);
+                entity.addComponent<CTarget>(game, target_name, 15.f, 0.8f);
+                entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["orb"], {0,230,8,8}));
             }
 
             entity.addGroup(Groups::drawable);
