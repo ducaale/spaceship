@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <functional>
 #include <iostream>
 
 #include <SFML/Graphics.hpp>
@@ -223,6 +224,10 @@ struct CAnimatedSprite  : BaseSprite<AnimatedSprite> {
 
     void play(const std::string animation) {
         sprite.play(animations[animation]);
+    }
+
+    void play(const std::string animation, std::function<void()> onAnimationDone) {
+        sprite.play(animations[animation], onAnimationDone);
     }
 
     void setAnimation(const std::string animation) {

@@ -24,6 +24,8 @@
 #ifndef ANIMATEDSPRITE_INCLUDE
 #define ANIMATEDSPRITE_INCLUDE
 
+#include <functional>
+
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/Graphics/Drawable.hpp>
@@ -42,6 +44,7 @@ public:
     void setFrameTime(sf::Time time);
     void play();
     void play(const Animation& animation);
+    void play(const Animation& animation, std::function<void()> onAnimationDone); // (modification)
     void pause();
     void stop();
     void setLooped(bool looped);
@@ -63,6 +66,8 @@ private:
     bool m_isLooped;
     const sf::Texture* m_texture;
     sf::Vertex m_vertices[4];
+
+    std::function<void()> m_onAnimationDone; // (modification)
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 

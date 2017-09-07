@@ -53,6 +53,12 @@ void AnimatedSprite::play(const Animation& animation)
     play();
 }
 
+void AnimatedSprite::play(const Animation& animation, std::function<void()> onAnimationDone)
+{
+    play(animation);
+    m_onAnimationDone = onAnimationDone;
+}
+
 void AnimatedSprite::pause()
 {
     m_isPaused = true;
@@ -165,6 +171,10 @@ void AnimatedSprite::update(sf::Time deltaTime)
                 if (!m_isLooped)
                 {
                     m_isPaused = true;
+                    if(m_onAnimationDone) {
+                        m_onAnimationDone();
+                        m_onAnimationDone = nullptr;
+                    }
                 }
                 else {
                     m_currentFrame = 0; // reset to start (modification)

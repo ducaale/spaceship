@@ -1,27 +1,12 @@
 #ifndef ORB_H
 #define ORB_H
 
+#include <algorithm>
+
 #include "game.h"
 #include "components.h"
 
-struct CEnemyInput : Component {
-    CAnimatedSprite *cSprite = nullptr;
-
-    void init() override {
-        cSprite = &entity->getComponent<CAnimatedSprite>();
-    }
-
-    void update(float elapsedTime) override {
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-            cSprite->sprite.stop();
-            cSprite->play("closeEyeAnimation");
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::O)) {
-            cSprite->sprite.stop();
-            cSprite->play("openEyeAnimation");
-        }
-    }
-};
+#include "utility.h"
 
 struct COrbArmBehaviour: Component {
     CGun *cGun = nullptr;
@@ -107,14 +92,74 @@ struct CRLBehaviour: Component {
 
 struct COrbBehaviour : Component {
     CLaserGun *cLaserGun = nullptr;
+    CAnimatedSprite *cSprite = nullptr;
+    CTarget *cTarget = nullptr;
+
+    enum States : std::size_t {
+        none,
+        normal_to_close,
+        close_to_open,
+        open_laser,
+        close_laser,
+        open_to_close,
+        close_to_normal
+    };
+
+    States currentState = States::none;
 
     void init() override {
         cLaserGun = &entity->getComponent<CLaserGun>();
+        cSprite = &entity->getComponent<CAnimatedSprite>();
+        cTarget = &entity->getComponent<CTarget>();
     }
 
     void update(float elapsedTime) override {
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
-            cLaserGun->openLaser();
+        switch(currentState) {
+            case States::normal_to_close:
+                cSprite->sprite.stop();
+                cSprite->play("normal_to_close", [&]() { currentState = States::close_to_open; });
+                currentState = States::none;
+                break;
+            case States::close_to_open:
+                cSprite->sprite.stop();
+                cSprite->play("close_to_open", [&]() { currentState = States::open_laser; });
+                currentState = States::none;
+                break;
+            case States::open_laser:
+                cLaserGun->openLaser();
+                currentState = States::none;
+                break;
+            case States::close_laser:
+                cLaserGun->closeLaser();
+                currentState = States::open_to_close;
+                break;
+            case States::open_to_close:
+                cSprite->sprite.stop();
+                cSprite->play("open_to_close", [&]() { currentState = States::close_to_normal; });
+                currentState = States::none;
+                break;
+            case States::close_to_normal:
+                cSprite->sprite.stop();
+                cSprite->play("close_to_normal");
+                currentState = States::none;
+                break;
+            default:
+                break;
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::O)) {
+            // open laser
+            currentState = States::normal_to_close;
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+            // close laser
+            currentState = States::close_laser;
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::I)) {
+            cTarget->targetOn = false;
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
+            cTarget->targetOn = true;
         }
     }
 };
