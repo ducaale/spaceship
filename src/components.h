@@ -129,6 +129,13 @@ struct BaseSprite : Component {
         this->scaleY = scaleY;
     }
 
+    void setOrigin(float centerX, float centerY) {
+        this->centerX = centerX;
+        this->centerY = centerY;
+
+        this->sprite.setOrigin(centerX, centerY);
+    }
+
     float width() {
         return sprite.getLocalBounds().width;
     }
@@ -394,10 +401,13 @@ struct CGun : Component {
     }
 };
 
+
 struct CLaserGun : Component {
     Game *game;
     sf::Sprite sprite;
     bool laserOn = false;
+
+    Entity *laser = nullptr;
 
     CLaserGun(Game *game, sf::Sprite sprite) :
         game(game),
@@ -409,19 +419,25 @@ struct CLaserGun : Component {
 
     void openLaser() {
         if(!laserOn) {
-            auto& firstPart = game->manager.addEntity();
-            firstPart.addComponent<CTransform>(sf::Vector2f(-256 - 64, 0));
-            firstPart.addComponent<CParent>(this->entity);
-            firstPart.addComponent<CSprite>(game, sprite);
-            firstPart.addGroup(Groups::drawable);
+            laser = &game->manager.addEntity();
+            laser->addComponent<CTransform>(sf::Vector2f(-90, 0));
+            laser->addComponent<CParent>(this->entity);
 
-            auto& secondPart = game->manager.addEntity();
-            secondPart.addComponent<CTransform>(sf::Vector2f((-256 - 64) * 2, 0));
-            secondPart.addComponent<CParent>(this->entity);
-            secondPart.addComponent<CSprite>(game, sprite);
-            secondPart.addGroup(Groups::drawable);
+            auto& laserSprite = laser->addComponent<CSprite>(game, sprite);
+            laserSprite.setOrigin(laserSprite.width(), laserSprite.height()/2);
+            laserSprite.setScale(2.5f, 1.3f);
+
+            laser->addGroup(Groups::drawable);
 
             laserOn = true;
+        }
+    }
+
+    void closeLaser() {
+        if(laserOn) {
+            laser->destroy();
+
+            laserOn = false;
         }
     }
 };
