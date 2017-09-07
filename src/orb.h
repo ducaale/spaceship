@@ -24,7 +24,7 @@ struct COrbArmBehaviour: Component {
 
             sf::Transform t = cParent->getTransform();
             sf::Vector2f gunPos = cTransform->position;
-            gunPos.x -= 64.f;
+            gunPos.x -= 94.f;
             gunPos.y += (cGun->projShot % 2 ?  -5 : 5);
             sf::Vector2f globalPosition = t.transformPoint(gunPos);
             float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
@@ -42,6 +42,11 @@ struct CRLBehaviour: Component {
     bool opening = false;
     bool closing = false;
     bool open = false;
+
+    float initialY, farthestY, speed;
+
+    CRLBehaviour(float initialY, float farthestY, float speed) :
+        initialY(initialY), farthestY(farthestY), speed(speed) {}
 
     void init() override {
         cTransform = &entity->getComponent<CTransform>();
@@ -62,7 +67,11 @@ struct CRLBehaviour: Component {
             sf::Transform t = cParent->getTransform();
             sf::Vector2f gunPos = cTransform->position;
 
-            gunPos.y += (cGun->projShot % 2 ?  -5 : -15);
+            if(farthestY > 0) {
+                gunPos.y += (cGun->projShot % 2 ?  5 : 15);
+            } else {
+                gunPos.y += (cGun->projShot % 2 ?  -5 : -15);
+            }
 
             gunPos.x -= 16.f;
             sf::Vector2f globalPosition = t.transformPoint(gunPos);
@@ -72,17 +81,17 @@ struct CRLBehaviour: Component {
         }
 
         if(opening) {
-            cTransform->position.y += -30.f * elapsedTime;
-            if(cTransform->position.y < -65.f) {
-                cTransform->position.y = -65.f;
+            auto newPosition = (cTransform->position.y += speed * elapsedTime);
+            cTransform->position.y = utility::clamp(newPosition, std::min(initialY, farthestY), std::max(initialY, farthestY));
+            if(cTransform->position.y == farthestY) {
                 opening = false;
                 open = true;
             }
         }
         else if(closing) {
-            cTransform->position.y += 30.f * elapsedTime;
-            if(cTransform->position.y > -32.f) {
-                cTransform->position.y = -32.f;
+            auto newPosition = (cTransform->position.y -= speed * elapsedTime);
+            cTransform->position.y = utility::clamp(newPosition, std::min(initialY, farthestY), std::max(initialY, farthestY));
+            if(cTransform->position.y == initialY) {
                 closing = false;
                 open = false;
             }
@@ -167,9 +176,11 @@ struct COrbBehaviour : Component {
 Entity& createRightArm(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-110.f));
+    float scaleX = 1.5f, scaleY = 1.5f;
+
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-170.f));
     entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
+
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
     cSprite.setScale(scaleX, scaleY);
 
@@ -186,9 +197,11 @@ Entity& createRightArm(Game *game, Entity& parent) {
 Entity& createLeftArm(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,110.f));
+    float scaleX = 1.5f, scaleY = 1.5f;
+
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,170.f));
     entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
+
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
     cSprite.setScale(scaleX, scaleY);
 
@@ -205,11 +218,16 @@ Entity& createLeftArm(Game *game, Entity& parent) {
 Entity& createRightRL(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-32.f));
+    float scaleX = 1.5f, scaleY = 1.5f;
+
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-48.f));
     entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
+
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
-    entity.addComponent<CRLBehaviour>();
+    cSprite.setScale(scaleX, scaleY);
+
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 1.f, 200.f, Groups::enemy_bullet);
+    entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
@@ -222,9 +240,16 @@ Entity& createRightRL(Game *game, Entity& parent) {
 Entity& createLeftRL(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(-1.5f,33.f));
+    float scaleX = 1.5f, scaleY = 1.5f;
+
+    entity.addComponent<CTransform>(sf::Vector2f(-1.5f,49.f));
     entity.addComponent<CParent>(&parent);
-    entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {128,128,32,64}));
+
+    auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {128,128,32,64}));
+    cSprite.setScale(scaleX, scaleY);
+
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 1.f, 200.f, Groups::enemy_bullet);
+    entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
@@ -238,6 +263,7 @@ void createOrb(Game *game) {
     auto& entity = game->manager.addEntity();
 
     float width = 128.f, height = 128.f;
+    float scaleX = 1.5f, scaleY = 1.5f;
 
     entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
     entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.4), true, false), width/2, height/2);
@@ -256,6 +282,7 @@ void createOrb(Game *game) {
     for(int i = 2; i > -1; i--) normal_to_close.addFrame(sf::IntRect(width * i, 0, width, height));
 
     auto& sprite = entity.getComponent<CAnimatedSprite>();
+    sprite.setScale(scaleX, scaleY);
 
     sprite.animations["close_to_open"] = close_to_open;
     sprite.animations["open_to_close"] = open_to_close;
