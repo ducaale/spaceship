@@ -242,8 +242,7 @@ void createOrb(Game *game) {
     sprite.animations["closeEyeAnimation"] = closeEyeAnimation;
     sprite.setAnimation("openEyeAnimation");
 
-    entity.addComponent<CEnemyInput>();
-    entity.addComponent<CTarget>(game, Groups::player, 0.5f, 0.8f);
+    entity.addComponent<CTarget>(game, Groups::player, 17.f, 0.9f);
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["orb"], {0,224,512,32}));
     entity.addComponent<COrbBehaviour>();
 

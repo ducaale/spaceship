@@ -307,10 +307,10 @@ struct CTarget : Component {
         }
 
         if(angle_diff > least_accurate_aim * accuracy) {
-            cTransform->angle -= turn_speed;
+            cTransform->angle -= turn_speed * elapsedTime;
         }
         else if(angle_diff < least_accurate_aim * -accuracy) {
-            cTransform->angle += turn_speed;
+            cTransform->angle += turn_speed * elapsedTime;
         }
 
     }
