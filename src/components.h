@@ -53,22 +53,20 @@ struct CPhysics : Component {
     }
 
     void update(float elapsedTime) override {
-        cTransform->position += velocity;
-        velocity = cTransform->getDirection() * speed * elapsedTime;
+        if(acceleration > 0) {
+            cTransform->position += velocity * elapsedTime;
+        }
+        else {
+            cTransform->position += speed * cTransform->getDirection() * elapsedTime;
+        }
     }
 
     void accelerate(float elapsedTime) {
-        speed += acceleration * elapsedTime;
-        if(speed > maxSpeed) {
-            speed = maxSpeed;
-        }
+        velocity += cTransform->getDirection() * acceleration * elapsedTime;
     }
 
     void deccelerate(float elapsedTime) {
-        speed -= acceleration * elapsedTime;
-        if(speed < 0) {
-            speed = 0;
-        }
+        velocity = velocity * 0.99f;
     }
 };
 
