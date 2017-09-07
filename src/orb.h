@@ -240,21 +240,28 @@ void createOrb(Game *game) {
     float width = 128.f, height = 128.f;
 
     entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
-    entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.8), true, false), width/2, height/2);
+    entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.4), true, false), width/2, height/2);
 
-    Animation openEyeAnimation, closeEyeAnimation;
+    Animation close_to_open, open_to_close, close_to_normal, normal_to_close;
 
-    openEyeAnimation.setSpriteSheet(game->resource["orb"]);
-    closeEyeAnimation.setSpriteSheet(game->resource["orb"]);
+    close_to_open.setSpriteSheet(game->resource["orb"]);
+    open_to_close.setSpriteSheet(game->resource["orb"]);
+    close_to_normal.setSpriteSheet(game->resource["orb"]);
+    normal_to_close.setSpriteSheet(game->resource["orb"]);
 
-    for(int i = 0; i < 4; i++)  openEyeAnimation.addFrame(sf::IntRect(width * i, 0, width, height));
-    for(int i = 3; i > -1; i--) closeEyeAnimation.addFrame(sf::IntRect(width * i, 0, width, height));
+    for(int i = 0; i < 4; i++)  close_to_open.addFrame(sf::IntRect(width * i, 0, width, height));
+    for(int i = 3; i > -1; i--) open_to_close.addFrame(sf::IntRect(width * i, 0, width, height));
+    for(int i = 0; i < 3; i++) open_to_close.addFrame(sf::IntRect(width * 0, 0, width, height));
+    for(int i = 0; i < 3; i++)  close_to_normal.addFrame(sf::IntRect(width * i, 0, width, height));
+    for(int i = 2; i > -1; i--) normal_to_close.addFrame(sf::IntRect(width * i, 0, width, height));
 
     auto& sprite = entity.getComponent<CAnimatedSprite>();
 
-    sprite.animations["openEyeAnimation"] = openEyeAnimation;
-    sprite.animations["closeEyeAnimation"] = closeEyeAnimation;
-    sprite.setAnimation("openEyeAnimation");
+    sprite.animations["close_to_open"] = close_to_open;
+    sprite.animations["open_to_close"] = open_to_close;
+    sprite.animations["close_to_normal"] = close_to_normal;
+    sprite.animations["normal_to_close"] = normal_to_close;
+    sprite.setAnimation("normal_to_close");
 
     entity.addComponent<CTarget>(game, Groups::player, 17.f, 0.9f);
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["orb"], {0,224,512,32}));
