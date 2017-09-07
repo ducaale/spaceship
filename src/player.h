@@ -87,14 +87,14 @@ struct CThruster : Component {
 void createThruster(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(45.f, 0.f));
+    entity.addComponent<CTransform>(sf::Vector2f(40.f, 0.f));
     entity.addComponent<CParent>(&parent);
 
     float width = 160.f;
     float height = 70.f;
 
-    float scaleX = 0.2f;
-    float scaleY = 0.2f;
+    float scaleX = 0.15f;
+    float scaleY = 0.25f;
 
     entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.09)), width/2, height/2);
 
