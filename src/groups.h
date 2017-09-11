@@ -9,7 +9,9 @@ enum Groups : std::size_t {
     enemy_bullet,
     enemy,
     drawable,
-    collidable
+    collidable,
+
+    orb
 };
 
 #endif /* GROUPS_H */

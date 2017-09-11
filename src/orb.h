@@ -5,6 +5,8 @@
 
 #include "game.h"
 #include "components.h"
+#include "observer.h"
+#include "events.h"
 
 #include "utility.h"
 
@@ -99,13 +101,14 @@ struct CRLBehaviour: Component {
     }
 };
 
-struct COrbBehaviour : Component {
+struct COrbBehaviour : Component, public Observer {
     CLaserGun *cLaserGun = nullptr;
     CAnimatedSprite *cSprite = nullptr;
     CTarget *cTarget = nullptr;
 
     enum States : std::size_t {
         none,
+        completed,
         normal_to_close,
         close_to_open,
         open_laser,
@@ -122,54 +125,86 @@ struct COrbBehaviour : Component {
         cTarget = &entity->getComponent<CTarget>();
     }
 
+    void nextAction(float elapsedTime) {
+        counter += elapsedTime;
+
+        if(counter > sleep && next) {
+            counter = 0;
+            next();
+        }
+
+    }
+
     void update(float elapsedTime) override {
+
         switch(currentState) {
+
             case States::normal_to_close:
                 cSprite->sprite.stop();
                 cSprite->play("normal_to_close", [&]() { currentState = States::close_to_open; });
                 currentState = States::none;
                 break;
+
             case States::close_to_open:
                 cSprite->sprite.stop();
                 cSprite->play("close_to_open", [&]() { currentState = States::open_laser; });
                 currentState = States::none;
                 break;
+
             case States::open_laser:
                 cLaserGun->openLaser();
-                currentState = States::none;
+                currentState = States::completed;
                 break;
+
             case States::close_laser:
                 cLaserGun->closeLaser();
                 currentState = States::open_to_close;
                 break;
+
             case States::open_to_close:
                 cSprite->sprite.stop();
                 cSprite->play("open_to_close", [&]() { currentState = States::close_to_normal; });
                 currentState = States::none;
                 break;
+
             case States::close_to_normal:
                 cSprite->sprite.stop();
                 cSprite->play("close_to_normal");
-                currentState = States::none;
+                currentState = States::completed;
                 break;
+
+            case States::completed:
+                nextAction(elapsedTime);
+                break;
+
             default:
                 break;
         }
+    }
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::O)) {
-            // open laser
-            currentState = States::normal_to_close;
+    void onNotify(Events event, float sleep, std::function<void()> next) override {
+        this->next = next;
+        this->sleep = sleep;
+
+        switch(event) {
+            case Events::orb_open_laser:
+                openLaser();
+                break;
+            case Events::orb_close_laser:
+                closeLaser();
+                break;
+            //TODO: target on and target off
+            default:
+                break;
         }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
-            // close laser
-            currentState = States::close_laser;
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::I)) {
-            cTarget->targetOn = false;
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
-            cTarget->targetOn = true;
-        }
+    }
+
+    void openLaser() {
+        currentState = States::normal_to_close;
+    }
+
+    void closeLaser() {
+        currentState = States::close_laser;
     }
 };
 
@@ -189,6 +224,7 @@ Entity& createRightArm(Game *game, Entity& parent) {
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
 
     return entity;
@@ -210,6 +246,7 @@ Entity& createLeftArm(Game *game, Entity& parent) {
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
 
     return entity;
@@ -231,6 +268,7 @@ Entity& createRightRL(Game *game, Entity& parent) {
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
     entity.setLayer(-1);
 
@@ -253,6 +291,7 @@ Entity& createLeftRL(Game *game, Entity& parent) {
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
     entity.setLayer(-1);
 
@@ -292,11 +331,14 @@ void createOrb(Game *game) {
 
     entity.addComponent<CTarget>(game, Groups::player, 17.f, 0.9f);
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["orb"], {0,224,512,32}));
-    entity.addComponent<COrbBehaviour>();
+    auto& orbBahviour = entity.addComponent<COrbBehaviour>();
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
+    entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
+
+    game->ai.addObserver(&orbBahviour);
 
     createLeftArm(game, entity);
     createRightArm(game, entity);

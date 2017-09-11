@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "manager.h"
+#include "ai.h"
 
 class Camera;
 
@@ -27,6 +28,8 @@ public:
     void loadResources();
 
     Manager manager;
+
+    AI ai;
 
     std::map<std::string, sf::Texture> resource;
 

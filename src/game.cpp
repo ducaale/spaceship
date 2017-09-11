@@ -31,6 +31,8 @@ Game::Game() {
     createPlayer(this);
     createOrb(this);
 
+    ai.init();
+
     camera = new Camera(manager, window);
 }
 
