@@ -10,42 +10,152 @@
 
 #include "utility.h"
 
-struct COrbArmBehaviour: Component {
+struct COrbArmBehaviour: Component, public Observer {
     CGun *cGun = nullptr;
     CTransform *cTransform = nullptr;
     CParent *cParent = nullptr;
+    CSprite *cSprite = nullptr;
+    Game *game = nullptr;
+
+    enum Side : std::size_t {
+        right,
+        left
+    };
+
+    Side side;
+
+    enum States : std::size_t {
+        none,
+        completed,
+        firing,
+        not_firing
+    };
+
+    States currentState = States::none;
+
+    COrbArmBehaviour(Game* game) : game(game) {}
 
     void init() override {
         cGun = &entity->getComponent<CGun>();
         cTransform = &entity->getComponent<CTransform>();
         cParent = &entity->getComponent<CParent>();
+        cSprite = &entity->getComponent<CSprite>();
+
+        side = cTransform->y() < 0 ? Side::right : Side::left;
+    }
+
+    void nextAction(float elapsedTime) {
+        // only one arm should notify the ai
+        if(side == Side::left) return;
+
+        counter += elapsedTime;
+
+        if(counter > sleep && next) {
+            currentState = States::none;
+            next();
+        }
+
     }
 
     void update(float elapsedTime) override {
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
+        switch(currentState) {
+            case States::firing:
+                fire();
+                nextAction(elapsedTime);
+                break;
 
-            sf::Transform t = cParent->getTransform();
-            sf::Vector2f gunPos = cTransform->position;
-            gunPos.x -= 94.f;
-            gunPos.y += (cGun->projShot % 2 ?  -5 : 5);
-            sf::Vector2f globalPosition = t.transformPoint(gunPos);
-            float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
+            case States::not_firing:
+                nextAction(elapsedTime);
+                break;
 
-            cGun->fire(globalPosition, globalAngle);
+            default:
+                break;
+        }
+
+        auto orbPos = game->manager.getByGroup(Groups::orb_body)->getComponent<CTransform>().position;
+        auto playerPos = game->manager.getByGroup(Groups::player)->getComponent<CTransform>().position;
+
+        float target_angle = 90 - (atan2(utility::magnitude(playerPos, orbPos), cTransform->y()) * 180 / PI);
+
+        if(std::fabs(cTransform->angle - target_angle) > 1) {
+            cTransform->angle += side == Side::left ? (30 * elapsedTime) : (-30 * elapsedTime);
+        }
+        else if(std::fabs(cTransform->angle - target_angle) < 1) {
+            cTransform->angle += side == Side::right ? (30 * elapsedTime) : (-30 * elapsedTime);
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+            cTransform->angle += side == Side::right ? (30 * elapsedTime) : (-30 * elapsedTime);
+        }
+        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            cTransform->angle += side == Side::left ? (30 * elapsedTime) : (-30 * elapsedTime);
+        }
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+            fire();
+        }
+    }
+
+    void fire() {
+        sf::Transform t = cParent->getTransform();
+
+        sf::Vector2f gunPos = cTransform->position;
+
+        gunPos = cSprite->getTransform().getInverse().transformPoint(gunPos);
+        gunPos.x -= 94.f;
+        gunPos.y += (cGun->projShot % 2 ?  -5 : 5);
+        gunPos = cSprite->getTransform().transformPoint(gunPos);
+
+        sf::Vector2f globalPosition = t.transformPoint(gunPos);
+
+        float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
+        globalAngle += cTransform->angle;
+
+        cGun->fire(globalPosition, globalAngle);
+    }
+
+    void onNotify(Events event, float sleep, std::function<void()> next) override {
+        this->next = next;
+        this->sleep = sleep;
+        this->counter = 0;
+
+        switch(event) {
+            case Events::orb_start_firing:
+                currentState = States::firing;
+                break;
+            case Events::orb_end_firing:
+                currentState = States::not_firing;
+                break;
+            default:
+                break;
         }
     }
 };
 
-struct CRLBehaviour: Component {
+struct CRLBehaviour: Component, public Observer {
     CTransform *cTransform = nullptr;
     CParent *cParent = nullptr;
     CGun *cGun = nullptr;
 
-    bool opening = false;
-    bool closing = false;
-    bool open = false;
-
     float initialY, farthestY, speed;
+
+    enum Side : std::size_t {
+        right,
+        left
+    };
+
+    Side side;
+
+    enum States : std::size_t {
+        opening,
+        closing,
+        open,
+        close
+    };
+
+    States currentState = States::close;
+
+    bool completed = false;
 
     CRLBehaviour(float initialY, float farthestY, float speed) :
         initialY(initialY), farthestY(farthestY), speed(speed) {}
@@ -54,49 +164,90 @@ struct CRLBehaviour: Component {
         cTransform = &entity->getComponent<CTransform>();
         cParent = &entity->getComponent<CParent>();
         cGun = &entity->getComponent<CGun>();
+
+        side = cTransform->y() < 0 ? Side::right : Side::left;
     }
 
     void update(float elapsedTime) override {
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::J)) {
-            opening = true;
-            closing = false;
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {
-            closing = true;
-            opening = false;
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::N)) {
-            sf::Transform t = cParent->getTransform();
-            sf::Vector2f gunPos = cTransform->position;
-
-            if(farthestY > 0) {
-                gunPos.y += (cGun->projShot % 2 ?  5 : 15);
-            } else {
-                gunPos.y += (cGun->projShot % 2 ?  -5 : -15);
-            }
-
-            gunPos.x -= 16.f;
-            sf::Vector2f globalPosition = t.transformPoint(gunPos);
-            float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
-
-            cGun->fire(globalPosition, globalAngle, Groups::player);
+        switch(currentState) {
+            case States::opening:
+                openGate(elapsedTime);
+                break;
+            case States::closing:
+                closeGate(elapsedTime);
+                break;
+            case States::open:
+                fire();
+                break;
+            default:
+                break;
         }
 
-        if(opening) {
-            auto newPosition = (cTransform->position.y += speed * elapsedTime);
-            cTransform->position.y = utility::clamp(newPosition, std::min(initialY, farthestY), std::max(initialY, farthestY));
-            if(cTransform->position.y == farthestY) {
-                opening = false;
-                open = true;
-            }
+        if(completed) {
+            nextAction(elapsedTime);
         }
-        else if(closing) {
-            auto newPosition = (cTransform->position.y -= speed * elapsedTime);
-            cTransform->position.y = utility::clamp(newPosition, std::min(initialY, farthestY), std::max(initialY, farthestY));
-            if(cTransform->position.y == initialY) {
-                closing = false;
-                open = false;
-            }
+
+    }
+
+    void openGate(float elapsedTime) {
+        auto newPosition = (cTransform->position.y += speed * elapsedTime);
+        cTransform->position.y = utility::clamp(newPosition, std::min(initialY, farthestY), std::max(initialY, farthestY));
+        if(cTransform->position.y == farthestY) {
+            currentState = States::open;
+            completed = true;
+        }
+    }
+
+    void closeGate(float elapsedTime) {
+        auto newPosition = (cTransform->position.y -= speed * elapsedTime);
+        cTransform->position.y = utility::clamp(newPosition, std::min(initialY, farthestY), std::max(initialY, farthestY));
+        if(cTransform->position.y == initialY) {
+            currentState = States::close;
+            completed = true;
+        }
+    }
+
+    void fire() {
+        sf::Transform t = cParent->getTransform();
+        sf::Vector2f gunPos = cTransform->position;
+
+        if(farthestY > 0) {
+            gunPos.y += (cGun->projShot % 2 ?  5 : 15);
+        } else {
+            gunPos.y += (cGun->projShot % 2 ?  -5 : -15);
+        }
+
+        gunPos.x -= 16.f;
+        sf::Vector2f globalPosition = t.transformPoint(gunPos);
+        float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
+
+        cGun->fire(globalPosition, globalAngle, Groups::player);
+    }
+
+    void nextAction(float elapsedTime) {
+        if(side == Side::left) return;
+
+        counter += elapsedTime;
+        if(counter > sleep && next) {
+            completed = false;
+            next();
+        }
+    }
+
+    void onNotify(Events event, float sleep, std::function<void()> next) override {
+        this->next = next;
+        this->sleep = sleep;
+        this->counter = 0;
+
+        switch(event) {
+            case Events::orb_start_lunching_rockets:
+                currentState = States::opening;
+                break;
+            case Events::orb_end_lunching_rockets:
+                currentState = States::closing;
+                break;
+            default:
+                break;
         }
     }
 };
@@ -114,7 +265,9 @@ struct COrbBehaviour : Component, public Observer {
         open_laser,
         close_laser,
         open_to_close,
-        close_to_normal
+        close_to_normal,
+        start_targeting,
+        end_targeting
     };
 
     States currentState = States::none;
@@ -129,7 +282,7 @@ struct COrbBehaviour : Component, public Observer {
         counter += elapsedTime;
 
         if(counter > sleep && next) {
-            counter = 0;
+            currentState = States::none;
             next();
         }
 
@@ -177,6 +330,16 @@ struct COrbBehaviour : Component, public Observer {
                 nextAction(elapsedTime);
                 break;
 
+            case States::start_targeting:
+                enableTargeting();
+                currentState = States::completed;
+                break;
+
+            case States::end_targeting:
+                disableTargeting();
+                currentState = States::completed;
+                break;
+
             default:
                 break;
         }
@@ -185,6 +348,7 @@ struct COrbBehaviour : Component, public Observer {
     void onNotify(Events event, float sleep, std::function<void()> next) override {
         this->next = next;
         this->sleep = sleep;
+        this->counter = 0;
 
         switch(event) {
             case Events::orb_open_laser:
@@ -193,7 +357,12 @@ struct COrbBehaviour : Component, public Observer {
             case Events::orb_close_laser:
                 closeLaser();
                 break;
-            //TODO: target on and target off
+            case Events::orb_start_targeting:
+                currentState = States::start_targeting;
+                break;
+            case Events::orb_end_targeting:
+                currentState = States::end_targeting;
+                break;
             default:
                 break;
         }
@@ -206,6 +375,14 @@ struct COrbBehaviour : Component, public Observer {
     void closeLaser() {
         currentState = States::close_laser;
     }
+
+    void enableTargeting() {
+        cTarget->enableTargeting();
+    }
+
+    void  disableTargeting() {
+        cTarget->disableTargeting();
+    }
 };
 
 Entity& createRightArm(Game *game, Entity& parent) {
@@ -213,19 +390,21 @@ Entity& createRightArm(Game *game, Entity& parent) {
 
     float scaleX = 1.5f, scaleY = 1.5f;
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-170.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-200.f));
     entity.addComponent<CParent>(&parent);
 
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
     cSprite.setScale(scaleX, scaleY);
 
     entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::enemy_bullet);
-    entity.addComponent<COrbArmBehaviour>();
+    auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
     entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
+
+    game->ai.addObserver(&orbBehaviour);
 
     return entity;
 }
@@ -235,19 +414,21 @@ Entity& createLeftArm(Game *game, Entity& parent) {
 
     float scaleX = 1.5f, scaleY = 1.5f;
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,170.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,200.f));
     entity.addComponent<CParent>(&parent);
 
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
     cSprite.setScale(scaleX, scaleY);
 
     entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::enemy_bullet);
-    entity.addComponent<COrbArmBehaviour>();
+    auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
     entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
+
+    game->ai.addObserver(&orbBehaviour);
 
     return entity;
 }
@@ -264,13 +445,15 @@ Entity& createRightRL(Game *game, Entity& parent) {
     cSprite.setScale(scaleX, scaleY);
 
     entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 1.f, 200.f, Groups::enemy_bullet);
-    entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
+    auto& behaviour = entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
     entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
     entity.setLayer(-1);
+
+    game->ai.addObserver(&behaviour);
 
     return entity;
 }
@@ -287,13 +470,15 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     cSprite.setScale(scaleX, scaleY);
 
     entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 1.f, 200.f, Groups::enemy_bullet);
-    entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
+    auto& behaviour = entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
     entity.addGroup(Groups::orb);
     entity.addGroup(Groups::enemy);
     entity.setLayer(-1);
+
+    game->ai.addObserver(&behaviour);
 
     return entity;
 }
@@ -329,16 +514,17 @@ void createOrb(Game *game) {
     sprite.animations["normal_to_close"] = normal_to_close;
     sprite.setAnimation("normal_to_close");
 
-    entity.addComponent<CTarget>(game, Groups::player, 17.f, 0.9f);
+    entity.addComponent<CTarget>(game, Groups::player, 35.f, 0.99f);
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["orb"], {0,224,512,32}));
-    auto& orbBahviour = entity.addComponent<COrbBehaviour>();
+    auto& orbBehaviour = entity.addComponent<COrbBehaviour>();
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
     entity.addGroup(Groups::orb);
+    entity.addGroup(Groups::orb_body);
     entity.addGroup(Groups::enemy);
 
-    game->ai.addObserver(&orbBahviour);
+    game->ai.addObserver(&orbBehaviour);
 
     createLeftArm(game, entity);
     createRightArm(game, entity);
