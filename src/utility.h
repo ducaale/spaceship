@@ -14,7 +14,7 @@ namespace utility {
 
     float dotProduct(const sf::Vector2f& v1, const sf::Vector2f& v2);
 
-    float magnitude(sf::Vector2f point, sf::Vector2f origin);
+    float magnitude(sf::Vector2f point, sf::Vector2f origin = sf::Vector2f(0.f,0.f));
 
     float distance(const sf::Vector2f& p1, const sf::Vector2f& p2);
 
