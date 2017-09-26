@@ -374,6 +374,10 @@ struct CPathTrail : Component {
     }
 };
 
+struct CCollision : Component {
+    std::function<void(Entity& e)> onCollision;
+};
+
 struct CGun : Component {
     Game *game;
     sf::Sprite sprite;
@@ -397,7 +401,7 @@ struct CGun : Component {
     void fire(sf::Vector2f position, float angle, Group target_name=0) {
         if(lastFired > 1/rateOfFire) {
             auto& entity = game->manager.addEntity();
-            entity.addComponent<CTransform>(position, angle);
+            auto& cTransform = entity.addComponent<CTransform>(position, angle);
             entity.addComponent<CPhysics>(speed, speed, 0.f);
             entity.addComponent<CSprite>(game, sprite);
             entity.addComponent<CTimerKiller>(5);
@@ -407,6 +411,12 @@ struct CGun : Component {
                 entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["orb"], {0,230,8,8}));
             }
 
+            auto& cCollision = entity.addComponent<CCollision>();
+            cCollision.onCollision = [this, &entity, &cTransform] (Entity& e) {
+                this->onCollision(cTransform.position, cTransform.angle);
+                entity.destroy();
+            };
+
             entity.addGroup(Groups::drawable);
             entity.addGroup(Groups::collidable);
             entity.addGroup(Groups::bullet);
@@ -415,6 +425,24 @@ struct CGun : Component {
             lastFired = 0.f;
             ++projShot;
         }
+    }
+
+    void onCollision(sf::Vector2f position, float angle) {
+        auto& entity = game->manager.addEntity();
+
+        entity.addComponent<CTransform>(position, angle);
+        entity.addComponent<CTimerKiller>(0.45f);
+        auto& cSprite = entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 16, 16);
+        cSprite.setScale(1.5f, 1.5f);
+
+        Animation bullet_impact;
+        bullet_impact.setSpriteSheet(game->resource["guns"]);
+        for(int k = 0; k < 4; k++) bullet_impact.addFrame(sf::IntRect(64 * k,64,32,32));
+
+        cSprite.animations["bullet_impact"] = bullet_impact;
+        cSprite.setAnimation("bullet_impact");
+
+        entity.addGroup(Groups::drawable);
     }
 };
 
@@ -458,8 +486,6 @@ struct CLaserGun : Component {
         }
     }
 };
-
-
 
 #endif /* end of include guard: COMPONENTS_H_QD5OJVYS */
 

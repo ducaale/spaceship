@@ -10,6 +10,7 @@
 #include "ai.h"
 
 class Camera;
+class Collision;
 
 class Game {
 public:
@@ -20,8 +21,6 @@ public:
     void updatePhase();
     void inputPhase();
     void drawPhase();
-
-    void checkCollision();
 
     void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
 
@@ -37,6 +36,7 @@ private:
     sf::RenderWindow window{{800,600}, "Spaceship"};
 
     Camera *camera = nullptr;
+    Collision *collision = nullptr;
 
     sf::Clock clock;
     sf::Time elapsedTime;
