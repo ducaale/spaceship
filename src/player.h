@@ -121,7 +121,7 @@ void createPlayer(Game *game) {
     entity.addComponent<CTransform>(sf::Vector2f(100.f,0.f), 180);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["player"], {0,0,160,70}));
     entity.addComponent<CPhysics>(200.f, 0.f, 150.f);
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 3.f, 200.f, Groups::player_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::player_bullet);
 
     auto& cSprite = entity.getComponent<CSprite>();
     cSprite.frames["right"] = std::make_tuple(sf::IntRect(0,0,160,70), sf::Vector2f(80.f, 38.f), sf::Vector2f(0.4f, 0.4f));
