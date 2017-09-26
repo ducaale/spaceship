@@ -11,7 +11,8 @@ enum Groups : std::size_t {
     drawable,
     collidable,
 
-    orb
+    orb,
+    orb_body
 };
 
 #endif /* GROUPS_H */
