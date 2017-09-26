@@ -18,12 +18,12 @@ void Camera::update(float elapsedTime) {
 
     auto& player_coor = player->getComponent<CTransform>().position;
     auto player_direction = player->getComponent<CTransform>().getDirection();
-    auto& player_vel = player->getComponent<CPhysics>().velocity;
+    auto player_vel = player->getComponent<CPhysics>().getSpeedPercentage();
     auto& enemy_coor = enemies[0]->getComponent<CTransform>().position;
 
-    if(utility::distance(player_coor, enemy_coor) > 900) {
-        offset = player_direction * 150.f;
-        coordinate = utility::lerp(0.02, coordinate, player_coor + offset /*+ (player_vel * 80.f)*/);
+    if(utility::distance(player_coor, enemy_coor) > 1200) {
+        offset = (player_direction * 150.f * (player_vel * 2.5f));
+        coordinate = utility::lerp(0.02, coordinate, player_coor + offset);
         scale = utility::lerp(0.02, scale, {800.f, 600.f});
     } else {
         coordinate = utility::lerp(0.02, coordinate, (player_coor + enemy_coor) * (1/2.f));

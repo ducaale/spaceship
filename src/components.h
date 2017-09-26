@@ -69,6 +69,14 @@ struct CPhysics : Component {
     void deccelerate(float elapsedTime) {
         velocity = velocity * 0.99f;
     }
+
+    float getSpeed() {
+        return utility::magnitude(velocity);
+    }
+
+    float getSpeedPercentage() {
+        return getSpeed() / maxSpeed;
+    }
 };
 
 struct CParent : Component {
