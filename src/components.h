@@ -461,9 +461,17 @@ struct CGun : Component {
 struct CLaserGun : Component {
     Game *game;
     sf::Sprite sprite;
-    bool laserOn = false;
 
     Entity *laser = nullptr;
+
+    enum States : std::size_t {
+        opening,
+        on,
+        closing,
+        off
+    };
+
+    States state = States::off;
 
     CLaserGun(Game *game, sf::Sprite sprite) :
         game(game),
@@ -471,10 +479,21 @@ struct CLaserGun : Component {
     {}
 
     void update(float elapsedTime) override {
+        if(state == States::closing) {
+
+            auto& laserSprite = laser->getComponent<CSprite>();
+
+            laserSprite.setScale(laserSprite.scaleX, laserSprite.scaleY - (3 * elapsedTime));
+
+            if(laserSprite.scaleY < 0) {
+                state = States::off;
+                laser->destroy();
+            }
+        }
     }
 
     void openLaser() {
-        if(!laserOn) {
+        if(state == States::off) {
             laser = &game->manager.addEntity();
             laser->addComponent<CTransform>(sf::Vector2f(-90, 0));
             laser->addComponent<CParent>(this->entity);
@@ -485,15 +504,13 @@ struct CLaserGun : Component {
 
             laser->addGroup(Groups::drawable);
 
-            laserOn = true;
+            state = States::on;
         }
     }
 
     void closeLaser() {
-        if(laserOn) {
-            laser->destroy();
-
-            laserOn = false;
+        if(state == States::on) {
+            state = States::closing;
         }
     }
 };
