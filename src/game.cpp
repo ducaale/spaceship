@@ -42,11 +42,13 @@ Game::Game() {
     camera = new Camera(manager, window);
 
     collision = new Collision(manager);
-    collision->noCollision.push_back(std::make_pair(Groups::enemy, Groups::enemy));
-    collision->noCollision.push_back(std::make_pair(Groups::enemy, Groups::enemy_bullet));
-    collision->noCollision.push_back(std::make_pair(Groups::enemy_bullet, Groups::enemy_bullet));
-    collision->noCollision.push_back(std::make_pair(Groups::player, Groups::player_bullet));
-    collision->noCollision.push_back(std::make_pair(Groups::player_bullet, Groups::player_bullet));
+    collision->noCollision = {
+        {Groups::enemy, Groups::enemy},
+        {Groups::enemy, Groups::enemy_bullet},
+        {Groups::enemy_bullet, Groups::enemy_bullet},
+        {Groups::player, Groups::player_bullet},
+        {Groups::player_bullet, Groups::player_bullet}
+    };
 }
 
 void Game::run() {
