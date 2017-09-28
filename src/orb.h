@@ -45,13 +45,14 @@ struct COrbArmBehaviour: Component, public Observer {
     }
 
     void nextAction(float elapsedTime) {
-        // only one arm should notify the ai
-        if(side == Side::left) return;
-
         counter += elapsedTime;
 
         if(counter > sleep && next) {
             currentState = States::none;
+
+            // only one arm should notify the ai
+            if(side == Side::left) return;
+
             next();
         }
 
@@ -60,6 +61,7 @@ struct COrbArmBehaviour: Component, public Observer {
     void update(float elapsedTime) override {
         switch(currentState) {
             case States::firing:
+                target(elapsedTime);
                 fire();
                 nextAction(elapsedTime);
                 break;
@@ -69,30 +71,36 @@ struct COrbArmBehaviour: Component, public Observer {
                 break;
 
             default:
+                reposition(elapsedTime);
                 break;
         }
 
+    }
+
+    void reposition(float elapsedTime) {
+        float turn_speed = 5.f;
+        float normal_position = side == Side::left ? -5 : 5;
+
+        if(std::fabs(cTransform->angle - normal_position) > 1) {
+            cTransform->angle += side == Side::right ? (turn_speed * elapsedTime) : (-turn_speed * elapsedTime);
+        }
+        else if(std::fabs(cTransform->angle - normal_position) < 1) {
+            cTransform->angle += side == Side::left ? (turn_speed * elapsedTime) : (-turn_speed * elapsedTime);
+        }
+    }
+
+    void target(float elapsedTime) {
+        float turn_speed = 7.f;
         auto orbPos = game->manager.getByGroup(Groups::orb_body)->getComponent<CTransform>().position;
         auto playerPos = game->manager.getByGroup(Groups::player)->getComponent<CTransform>().position;
 
         float target_angle = 90 - (atan2(utility::magnitude(playerPos, orbPos), cTransform->y()) * 180 / PI);
 
         if(std::fabs(cTransform->angle - target_angle) > 1) {
-            cTransform->angle += side == Side::left ? (30 * elapsedTime) : (-30 * elapsedTime);
+            cTransform->angle += side == Side::left ? (turn_speed * elapsedTime) : (-turn_speed * elapsedTime);
         }
         else if(std::fabs(cTransform->angle - target_angle) < 1) {
-            cTransform->angle += side == Side::right ? (30 * elapsedTime) : (-30 * elapsedTime);
-        }
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
-            cTransform->angle += side == Side::right ? (30 * elapsedTime) : (-30 * elapsedTime);
-        }
-        else if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-            cTransform->angle += side == Side::left ? (30 * elapsedTime) : (-30 * elapsedTime);
-        }
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
-            fire();
+            cTransform->angle += side == Side::right ? (turn_speed * elapsedTime) : (-turn_speed * elapsedTime);
         }
     }
 

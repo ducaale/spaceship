@@ -11,7 +11,7 @@ private:
 
 public:
     AI() {
-        orders.push_back(std::make_pair(Events::orb_start_firing, 2));
+        orders.push_back(std::make_pair(Events::orb_start_firing, 6));
         orders.push_back(std::make_pair(Events::orb_end_firing, 0));
 
         orders.push_back(std::make_pair(Events::orb_end_targeting, 0));
