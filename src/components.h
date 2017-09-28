@@ -410,13 +410,16 @@ struct CGun : Component {
         if(lastFired > 1/rateOfFire) {
             auto& entity = game->manager.addEntity();
             auto& cTransform = entity.addComponent<CTransform>(position, angle);
-            entity.addComponent<CPhysics>(speed, speed, 0.f);
+            auto& cPhysics = entity.addComponent<CPhysics>(speed, speed, 0.f);
             entity.addComponent<CSprite>(game, sprite);
-            entity.addComponent<CTimerKiller>(5);
+            auto& cTimerKiller = entity.addComponent<CTimerKiller>(5);
 
             if(target_name) {
-                entity.addComponent<CTarget>(game, target_name, 15.f, 0.8f);
-                entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["orb"], {0,230,8,8}));
+                entity.addComponent<CTarget>(game, target_name, 15.f, 1.f);
+                entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["guns"], {0,130,8,8}));
+
+                cPhysics.speed /= 2.f;
+                cTimerKiller.end *= 3;
             }
 
             auto& cCollision = entity.addComponent<CCollision>();
