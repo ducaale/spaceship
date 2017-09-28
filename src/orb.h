@@ -78,8 +78,8 @@ struct COrbArmBehaviour: Component, public Observer {
     }
 
     void reposition(float elapsedTime) {
-        float turn_speed = 5.f;
-        float normal_position = side == Side::left ? -5 : 5;
+        float turn_speed = 15.f;
+        float normal_position = side == Side::left ? -15 : 15;
 
         if(std::fabs(cTransform->angle - normal_position) > 1) {
             cTransform->angle += side == Side::right ? (turn_speed * elapsedTime) : (-turn_speed * elapsedTime);
@@ -398,7 +398,7 @@ Entity& createRightArm(Game *game, Entity& parent) {
 
     float scaleX = 1.5f, scaleY = 1.5f;
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,-200.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,-200.f), 15);
     entity.addComponent<CParent>(&parent);
 
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
@@ -427,7 +427,7 @@ Entity& createLeftArm(Game *game, Entity& parent) {
 
     float scaleX = 1.5f, scaleY = 1.5f;
 
-    entity.addComponent<CTransform>(sf::Vector2f(0.f,200.f));
+    entity.addComponent<CTransform>(sf::Vector2f(0.f,200.f), -15);
     entity.addComponent<CParent>(&parent);
 
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
