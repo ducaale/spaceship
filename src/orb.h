@@ -396,7 +396,12 @@ Entity& createRightArm(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {384,128,128,32}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::enemy_bullet);
+    auto& cFlash = entity.addComponent<CFlash>();
+
+    auto& cCollision = entity.addComponent<CCollision>();
+    cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
+
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), 4.f, 300.f, Groups::enemy_bullet);
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -420,7 +425,12 @@ Entity& createLeftArm(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {256,128,128,32}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 4.f, 300.f, Groups::enemy_bullet);
+    auto& cFlash = entity.addComponent<CFlash>();
+
+    auto& cCollision = entity.addComponent<CCollision>();
+    cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
+
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), 4.f, 300.f, Groups::enemy_bullet);
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -444,7 +454,7 @@ Entity& createRightRL(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 1.f, 200.f, Groups::enemy_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), 1.f, 200.f, Groups::enemy_bullet);
     auto& behaviour = entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
 
     entity.addGroup(Groups::drawable);
@@ -469,7 +479,7 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {128,128,32,64}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["orb"], {0,256,32,16}), 1.f, 200.f, Groups::enemy_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), 1.f, 200.f, Groups::enemy_bullet);
     auto& behaviour = entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
 
     entity.addGroup(Groups::drawable);
@@ -514,8 +524,13 @@ void createOrb(Game *game) {
     sprite.animations["normal_to_close"] = normal_to_close;
     sprite.setAnimation("normal_to_close");
 
+    auto& cFlash = entity.addComponent<CFlash>();
+
+    auto& cCollision = entity.addComponent<CCollision>();
+    cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
+
     entity.addComponent<CTarget>(game, Groups::player, 35.f, 0.99f);
-    entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["orb"], {0,224,512,32}));
+    entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["guns"], {0,128,512,32}));
     auto& orbBehaviour = entity.addComponent<COrbBehaviour>();
 
     entity.addGroup(Groups::drawable);

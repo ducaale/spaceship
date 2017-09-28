@@ -498,5 +498,40 @@ struct CLaserGun : Component {
     }
 };
 
+struct CFlash : Component {
+    float counter = 0;
+    float end = 0.2f;
+
+    bool flashing = false;
+
+    void update(float elapsedTime) override {
+        counter += elapsedTime;
+
+        if(flashing) {
+            if(entity->hasComponent<CSprite>()) {
+                entity->getComponent<CSprite>().sprite.setColor(sf::Color::Yellow);
+            }
+            if(entity->hasComponent<CAnimatedSprite>()) {
+                entity->getComponent<CAnimatedSprite>().sprite.setColor(sf::Color::Yellow);
+            }
+        }
+
+        if(counter > end) {
+            flashing = false;
+            if(entity->hasComponent<CSprite>()) {
+                entity->getComponent<CSprite>().sprite.setColor(sf::Color::White);
+            }
+            if(entity->hasComponent<CAnimatedSprite>()) {
+                entity->getComponent<CAnimatedSprite>().sprite.setColor(sf::Color::White);
+            }
+        }
+    }
+
+    void flash() {
+        flashing = true;
+        counter = 0;
+    }
+};
+
 #endif /* end of include guard: COMPONENTS_H_QD5OJVYS */
 
