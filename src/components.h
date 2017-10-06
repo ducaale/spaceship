@@ -453,19 +453,20 @@ struct CGun : Component {
             entity.addComponent<CSprite>(game, sprite);
             auto& cTimerKiller = entity.addComponent<CTimerKiller>(5);
 
+            auto& cCollision = entity.addComponent<CCollision>();
+            cCollision.onCollision = [this, &entity, &cTransform, target_name] (Entity& e) {
+                this->onCollision(cTransform.position, cTransform.angle, target_name);
+                entity.destroy();
+            };
+
             if(target_name) {
                 entity.addComponent<CTarget>(game, target_name, 15.f, 1.f);
+                entity.addComponent<CRocketBehaviour>(game);
                 entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["guns"], {0,130,8,8}));
 
                 cPhysics.speed /= 2.f;
                 cTimerKiller.end *= 3;
             }
-
-            auto& cCollision = entity.addComponent<CCollision>();
-            cCollision.onCollision = [this, &entity, &cTransform] (Entity& e) {
-                this->onCollision(cTransform.position, cTransform.angle);
-                entity.destroy();
-            };
 
             entity.addGroup(Groups::drawable);
             entity.addGroup(Groups::collidable);
@@ -477,21 +478,38 @@ struct CGun : Component {
         }
     }
 
-    void onCollision(sf::Vector2f position, float angle) {
+    void onCollision(sf::Vector2f position, float angle, Group target_name) {
         auto& entity = game->manager.addEntity();
 
         entity.addComponent<CTransform>(position, angle);
         entity.addComponent<CTimerKiller>(0.45f);
-        auto& cSprite = entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 16, 16);
-        cSprite.setScale(1.5f, 1.5f);
 
-        Animation bullet_impact;
-        bullet_impact.setSpriteSheet(game->resource["guns"]);
-        for(int k = 0; k < 4; k++) bullet_impact.addFrame(sf::IntRect(64 * k,64,32,32));
+        if(target_name) {
+            auto& cSprite = entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 32, 32);
+            cSprite.setScale(2.5f, 2.5f);
 
-        cSprite.animations["bullet_impact"] = bullet_impact;
-        cSprite.setAnimation("bullet_impact");
+            Animation rocket_impact;
+            rocket_impact.setSpriteSheet(game->resource["guns"]);
+            for(int k = 0; k < 2; k++) rocket_impact.addFrame(sf::IntRect(0,192,64,64));
+            for(int k = 0; k < 4; k++) rocket_impact.addFrame(sf::IntRect(64,192,64,64));
 
+            cSprite.animations["rocket_impact"] = rocket_impact;
+            cSprite.setAnimation("rocket_impact");
+        }
+        else {
+            auto& cSprite = entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 16, 16);
+            cSprite.setScale(1.5f, 1.5f);
+
+            Animation bullet_impact;
+            bullet_impact.setSpriteSheet(game->resource["guns"]);
+            for(int k = 0; k < 4; k++) bullet_impact.addFrame(sf::IntRect(64 * k,64,32,32));
+
+            cSprite.animations["bullet_impact"] = bullet_impact;
+            cSprite.setAnimation("bullet_impact");
+        }
+
+
+        entity.setLayer(2);
         entity.addGroup(Groups::drawable);
     }
 };
