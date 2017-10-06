@@ -386,6 +386,45 @@ struct CCollision : Component {
     std::function<void(Entity& e)> onCollision;
 };
 
+struct CCircleCollider : Component {
+    float radius;
+    CTransform *cTransform = nullptr;
+
+    CCircleCollider(float radius) : radius(radius) {}
+
+    void init() override {
+        cTransform = &entity->getComponent<CTransform>();
+    }
+
+    sf::Vector2f center() {
+        return cTransform->position;
+    }
+};
+
+struct CRocketBehaviour : Component {
+    Game *game = nullptr;
+    CTransform *cTransform = nullptr;
+    CCollision *cCollision = nullptr;
+    Entity* player = nullptr;
+
+    CRocketBehaviour(Game* game) : game(game) {}
+
+    void init() override {
+        cTransform = &entity->getComponent<CTransform>();
+        cCollision = &entity->getComponent<CCollision>();
+        player = game->manager.getByGroup(Groups::player);
+    }
+
+    void update(float elapsedTime) override {
+        auto playerPos = player->getComponent<CTransform>().position;
+        auto currentPos = cTransform->position;
+
+        if(utility::magnitude(currentPos, playerPos) < 100) {
+            cCollision->onCollision(*player);
+        }
+    }
+};
+
 struct CGun : Component {
     Game *game;
     sf::Sprite sprite;
@@ -456,7 +495,6 @@ struct CGun : Component {
         entity.addGroup(Groups::drawable);
     }
 };
-
 
 struct CLaserGun : Component {
     Game *game;

@@ -13,6 +13,23 @@
 
 class Collision {
 private:
+    std::pair<sf::Vector2f, float> getCircle(Entity& e) {
+
+        auto& circleCollider = e.getComponent<CCircleCollider>();
+
+        auto center = circleCollider.center();
+        auto radius = circleCollider.radius;
+
+        if(e.hasComponent<CSprite>()) {
+            radius *= e.getComponent<CSprite>().scaleX;   //assume scaleX and scaleY are equal
+        }
+        else {
+            radius *= e.getComponent<CAnimatedSprite>().scaleX;
+        }
+
+        return std::make_pair(center, radius);
+    }
+
     void getVertices(Entity& e, std::array<sf::Vector2f, 4>& entity_vertices) {
         sf::Transform t;
         float width, height;
@@ -71,11 +88,22 @@ private:
         return true;
     }
 
+    bool test_collision(Entity& e1, Entity& e2) {
+        if(e1.hasComponent<CCircleCollider>() && !e2.hasComponent<CCircleCollider>()) {
+            return testCollisionCR(e1, e2);
+        }
+        if(!e1.hasComponent<CCircleCollider>() && e2.hasComponent<CCircleCollider>()) {
+            return testCollisionCR(e2, e1);
+        }
+
+        return testCollisionRR(e1, e2);
+    }
+
 
     /**
      * SAT collision test for rectangles
      */
-    bool test_collision(Entity& e1, Entity& e2) {
+    bool testCollisionRR(Entity& e1, Entity& e2) {
 
         std::array<sf::Vector2f, 4> entity1_vertices, entity2_vertices;
         getVertices(e1, entity1_vertices);
@@ -83,7 +111,7 @@ private:
 
         std::array<sf::Vector2f, 4> entity_axis;
         getAxis(entity1_vertices, entity2_vertices, entity_axis);
-        
+
         for(auto& axis : entity_axis) {
             auto [min1, max1] = projVectToAxis(axis, entity1_vertices);
             auto [min2, max2] = projVectToAxis(axis, entity2_vertices);
@@ -91,6 +119,26 @@ private:
         }
 
         return true;
+    }
+
+    /**
+     * collision test between circle and rectangle
+     * checks the distance between rectangles vertices and circle center
+     */
+    bool testCollisionCR(Entity& e1, Entity& e2) {
+
+        auto [circleCenter, radius] = getCircle(e1);
+
+        std::array<sf::Vector2f, 4> rect_vertices;
+        getVertices(e2, rect_vertices);
+
+        for(int i = 0; i < 4; i++) {
+            if(utility::magnitude(rect_vertices[i], circleCenter) < radius) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     bool canCollide(Entity& e1, Entity& e2) {
@@ -117,9 +165,9 @@ public:
 
                 if(!canCollide(*collidables[i], *collidables[j])) continue;
 
-                if(test_collision(*collidables[i], *collidables[j])) { 
-                    if(collidables[i]->hasComponent<CCollision>()) collidables[i]->getComponent<CCollision>().onCollision(*collidables[j]); 
-                    if(collidables[j]->hasComponent<CCollision>()) collidables[j]->getComponent<CCollision>().onCollision(*collidables[i]); 
+                if(test_collision(*collidables[i], *collidables[j])) {
+                    if(collidables[i]->hasComponent<CCollision>()) collidables[i]->getComponent<CCollision>().onCollision(*collidables[j]);
+                    if(collidables[j]->hasComponent<CCollision>()) collidables[j]->getComponent<CCollision>().onCollision(*collidables[i]);
                 }
 
             }

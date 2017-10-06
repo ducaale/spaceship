@@ -534,6 +534,8 @@ void createOrb(Game *game) {
 
     auto& cFlash = entity.addComponent<CFlash>();
 
+    entity.addComponent<CCircleCollider>(64.f);
+
     auto& cCollision = entity.addComponent<CCollision>();
     cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
 
