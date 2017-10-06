@@ -55,7 +55,7 @@ void Game::run() {
     while(window.isOpen()) {
         elapsedTime = clock.restart();
 
-        window.clear(sf::Color::Black);
+        window.clear({28, 34, 61});
 
         inputPhase();
         updatePhase();
