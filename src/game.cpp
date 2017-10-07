@@ -61,6 +61,10 @@ void Game::run() {
         updatePhase();
         drawPhase();
 
+        f++;
+        if((f % 10) == 0) {
+            window.setTitle(std::to_string(std::round(1.f / elapsedTime.asSeconds())));
+        }
     }
 }
 

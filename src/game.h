@@ -38,6 +38,7 @@ private:
     Camera *camera = nullptr;
     Collision *collision = nullptr;
 
+    int f = 0;
     sf::Clock clock;
     sf::Time elapsedTime;
     sf::Time simulationTime;
