@@ -508,7 +508,7 @@ void createOrb(Game *game) {
     float scaleX = 1.5f, scaleY = 1.5f;
 
     entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
-    entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.4), true, false), width/2, height/2);
+    entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.2), true, false), width/2, height/2);
 
     Animation close_to_open, open_to_close, close_to_normal, normal_to_close;
 
