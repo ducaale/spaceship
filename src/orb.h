@@ -394,6 +394,15 @@ struct COrbBehaviour : Component, public Observer {
 };
 
 Entity& createRightArm(Game *game, Entity& parent) {
+
+    //load values from json file
+    std::ifstream file("values.json");
+    json values;
+    file >> values;
+
+    float gun_speed = values["orb_arm"]["gun"]["speed"];
+    float bullets_per_second = values["orb_arm"]["gun"]["bullets_per_second"];
+
     auto& entity = game->manager.addEntity();
 
     float scaleX = 1.5f, scaleY = 1.5f;
@@ -409,7 +418,7 @@ Entity& createRightArm(Game *game, Entity& parent) {
     auto& cCollision = entity.addComponent<CCollision>();
     cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), 4.f, 300.f, Groups::enemy_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -423,6 +432,15 @@ Entity& createRightArm(Game *game, Entity& parent) {
 }
 
 Entity& createLeftArm(Game *game, Entity& parent) {
+
+    //load values from json file
+    std::ifstream file("values.json");
+    json values;
+    file >> values;
+
+    float gun_speed = values["orb_arm"]["gun"]["speed"];
+    float bullets_per_second = values["orb_arm"]["gun"]["bullets_per_second"];
+
     auto& entity = game->manager.addEntity();
 
     float scaleX = 1.5f, scaleY = 1.5f;
@@ -438,7 +456,7 @@ Entity& createLeftArm(Game *game, Entity& parent) {
     auto& cCollision = entity.addComponent<CCollision>();
     cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), 4.f, 300.f, Groups::enemy_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -452,6 +470,15 @@ Entity& createLeftArm(Game *game, Entity& parent) {
 }
 
 Entity& createRightRL(Game *game, Entity& parent) {
+
+    //load values from json file
+    std::ifstream file("values.json");
+    json values;
+    file >> values;
+
+    float gun_speed = values["orb_rocket_luncher"]["gun"]["speed"];
+    float bullets_per_second = values["orb_rocket_luncher"]["gun"]["bullets_per_second"];
+
     auto& entity = game->manager.addEntity();
 
     float scaleX = 1.5f, scaleY = 1.5f;
@@ -462,7 +489,7 @@ Entity& createRightRL(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), 1.f, 200.f, Groups::enemy_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     auto& behaviour = entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
 
     entity.addGroup(Groups::drawable);
@@ -477,6 +504,16 @@ Entity& createRightRL(Game *game, Entity& parent) {
 }
 
 Entity& createLeftRL(Game *game, Entity& parent) {
+
+
+    //load values from json file
+    std::ifstream file("values.json");
+    json values;
+    file >> values;
+
+    float gun_speed = values["orb_rocket_luncher"]["gun"]["speed"];
+    float bullets_per_second = values["orb_rocket_luncher"]["gun"]["bullets_per_second"];
+
     auto& entity = game->manager.addEntity();
 
     float scaleX = 1.5f, scaleY = 1.5f;
@@ -487,7 +524,7 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {128,128,32,64}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), 1.f, 200.f, Groups::enemy_bullet);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     auto& behaviour = entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
 
     entity.addGroup(Groups::drawable);
@@ -502,12 +539,24 @@ Entity& createLeftRL(Game *game, Entity& parent) {
 }
 
 void createOrb(Game *game) {
+
+    //load values from json file
+    std::ifstream file("values.json");
+    json values;
+    file >> values;
+
+    sf::Vector2f position = {values["orb"]["initial_position"]["x"], values["orb"]["initial_position"]["y"]};
+    float angle = values["orb"]["initial_angle"];
+    float turn_speed = values["orb"]["turn_speed"];
+    float targeting_accuracy = values["orb"]["targeting_accuracy"];
+
+
     auto& entity = game->manager.addEntity();
 
     float width = 128.f, height = 128.f;
     float scaleX = 1.5f, scaleY = 1.5f;
 
-    entity.addComponent<CTransform>(sf::Vector2f(200.f,200.f));
+    entity.addComponent<CTransform>(position, angle);
     entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.2), true, false), width/2, height/2);
 
     Animation close_to_open, open_to_close, close_to_normal, normal_to_close;
@@ -539,7 +588,7 @@ void createOrb(Game *game) {
     auto& cCollision = entity.addComponent<CCollision>();
     cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
 
-    entity.addComponent<CTarget>(game, Groups::player, 35.f, 0.99f);
+    entity.addComponent<CTarget>(game, Groups::player, turn_speed, targeting_accuracy);
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["guns"], {0,128,512,32}));
     auto& orbBehaviour = entity.addComponent<COrbBehaviour>();
 

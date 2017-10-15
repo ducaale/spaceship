@@ -1,0 +1,42 @@
+{
+    "player": {
+        "initial_position": {
+            "x": 100.0,
+            "y": 0.0
+        },
+        "initial_angle" : 180,
+        "max_speed": 200.0,
+        "acceleration": 150.0,
+        "turn_speed": 150.0,
+
+        "gun": {
+            "speed": 300.0,
+            "bullets_per_second": 4.0
+        }
+    },
+
+    "orb": {
+        "initial_position": {
+            "x": 200.0,
+            "y": 200.0
+        },
+        "initial_angle" : 0,
+        "turn_speed": 35,
+        "targeting_accuracy": 0.99
+    },
+
+    "orb_arm": {
+        "gun": {
+            "speed": 300.0,
+            "bullets_per_second": 4.0
+        }
+    },
+
+    "orb_rocket_luncher": {
+        "gun": {
+            "speed": 200.0,
+            "bullets_per_second": 1
+        }
+
+    }
+}

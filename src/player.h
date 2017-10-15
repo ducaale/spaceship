@@ -1,8 +1,14 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <fstream>
+
 #include "game.h"
 #include "components.h"
+
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 struct CPlayerMovement : Component {
 
@@ -10,6 +16,10 @@ struct CPlayerMovement : Component {
     CPhysics *cPhysics = nullptr;
     CSprite *cSprite = nullptr;
     CGun *cGun = nullptr;
+
+    float turn_speed = 0;
+
+    CPlayerMovement(float turn_speed) : turn_speed(turn_speed) {}
 
     void init() override {
         cTransform = &entity->getComponent<CTransform>();
@@ -35,25 +45,14 @@ struct CPlayerMovement : Component {
     void update(float elapsedTime) override {
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
-
-            sf::Transform t = cSprite->getTransform(false, true);
-            sf::Vector2f gunPos(0.f, 0.f);
-
-            gunPos.y += (cGun->projShot % 2 ?  +5 : -5);
-
-            gunPos.x -= 150.f;
-            sf::Vector2f globalPosition = t.transformPoint(gunPos);
-
-            float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
-
-            cGun->fire(globalPosition, globalAngle);
+            fire();
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            cTransform->angle -= (150 * elapsedTime );
+            cTransform->angle -= (turn_speed * elapsedTime );
             changeView();
         }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            cTransform->angle += ( 150 * elapsedTime );
+            cTransform->angle += (turn_speed * elapsedTime );
             changeView();
         }
 
@@ -61,6 +60,20 @@ struct CPlayerMovement : Component {
             cPhysics->accelerate(elapsedTime);
         }
         cPhysics->deccelerate(elapsedTime);
+    }
+
+    void fire() {
+        sf::Transform t = cSprite->getTransform(false, true);
+        sf::Vector2f gunPos(0.f, 0.f);
+
+        gunPos.y += (cGun->projShot % 2 ?  +5 : -5);
+
+        gunPos.x -= 150.f;
+        sf::Vector2f globalPosition = t.transformPoint(gunPos);
+
+        float globalAngle = atan2(t.getMatrix()[1], t.getMatrix()[0]) * 180 / PI;
+
+        cGun->fire(globalPosition, globalAngle);
     }
 };
 
@@ -116,12 +129,27 @@ void createThruster(Game *game, Entity& parent) {
 }
 
 void createPlayer(Game *game) {
+
+    //load values from json file
+    std::ifstream file("values.json");
+    json values;
+    file >> values;
+
+    sf::Vector2f position = {values["player"]["initial_position"]["x"], values["player"]["initial_position"]["y"]};
+    float angle = values["player"]["initial_angle"];
+    float max_speed = values["player"]["max_speed"];
+    float acceleration = values["player"]["acceleration"];
+    float turn_speed = values["player"]["turn_speed"];
+    float gun_speed = values["player"]["gun"]["speed"];
+    float bullets_per_second = values["player"]["gun"]["bullets_per_second"];
+
+
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(100.f,0.f), 180);
+    entity.addComponent<CTransform>(position, angle);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["player"], {0,0,160,70}));
-    entity.addComponent<CPhysics>(200.f, 0.f, 150.f);
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), 4.f, 300.f, Groups::player_bullet);
+    entity.addComponent<CPhysics>(max_speed, 0.f, acceleration);
+    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::player_bullet);
 
     auto& cSprite = entity.getComponent<CSprite>();
     cSprite.frames["right"] = std::make_tuple(sf::IntRect(0,0,160,70), sf::Vector2f(80.f, 38.f), sf::Vector2f(0.4f, 0.4f));
@@ -129,7 +157,7 @@ void createPlayer(Game *game) {
     cSprite.frames["left"] = std::make_tuple(sf::IntRect(320,0,160,70), sf::Vector2f(80.f, 32.f), sf::Vector2f(0.4f, 0.4f));
     cSprite.changeFrame("right");
 
-    entity.addComponent<CPlayerMovement>();
+    entity.addComponent<CPlayerMovement>(turn_speed);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::player);
