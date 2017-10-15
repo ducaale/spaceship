@@ -32,6 +32,8 @@ void Game::loadResources() {
 
 Game::Game() {
 
+    window.setFramerateLimit(60);
+
     loadResources();
 
     createPlayer(this);
@@ -78,7 +80,7 @@ void Game::inputPhase() {
 
 void Game::updatePhase() {
     simulationTime = sf::seconds(0.f);
-    for(int i = 0; simulationTime <= elapsedTime && i < 10; simulationTime += timeSlice, i++) {
+    for(int i = 0; simulationTime <= elapsedTime && i < 5; simulationTime += timeSlice, i++) {
         manager.refresh();
         camera->update(timeSlice.asSeconds());
         manager.update(timeSlice.asSeconds());
