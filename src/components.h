@@ -462,7 +462,7 @@ struct CGun : Component {
             if(target_name) {
                 entity.addComponent<CTarget>(game, target_name, 15.f, 1.f);
                 entity.addComponent<CRocketBehaviour>(game);
-                entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["guns"], {0,130,8,8}));
+                //entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["guns"], {0,130,8,8}));
 
                 cPhysics.speed /= 2.f;
                 cTimerKiller.end *= 3;

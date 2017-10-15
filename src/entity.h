@@ -60,7 +60,9 @@ public:
     }
 
     void addGroup(Group group);
-    void delGroup(Group group) { groupBitset[group] = false; }
+    void delGroup(Group group) {
+        if(hasGroup(group)) groupBitset[group] = false;
+    }
 
     template <typename T, typename... Targs>
     T& addComponent(Targs&&... mArgs) {
