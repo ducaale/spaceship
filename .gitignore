@@ -3,5 +3,6 @@
 *.d
 # ignore final exuctuble
 game
+game.exe
 # sprites folder
 sprite/
