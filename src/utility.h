@@ -24,6 +24,10 @@ namespace utility {
 
     float lerp(float t, float a, float b);
 
+    float smoothStep(float t);
+
+    float smootherStep(float t);
+
     float clamp(float n, float lower, float upper);
 }
 

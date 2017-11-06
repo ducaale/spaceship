@@ -41,6 +41,14 @@ namespace utility {
         return (1-t)*a + t*b;
     }
 
+    float smoothStep(float t) {
+        return (t * t) * (3.f - (2.f * t));
+    }
+
+    float smootherStep(float t) {
+        return (t * t * t) * (t * (6.f * t  - 15.f) + 10.f);
+    }
+
     float clamp(float n, float lower, float upper) {
         return std::max(lower, std::min(n, upper));
     }
