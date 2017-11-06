@@ -651,18 +651,20 @@ void createOrb(Game *game) {
     entity.addComponent<CTransform>(position, angle);
     entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.2), true, false), width/2, height/2);
 
-    Animation close_to_open, open_to_close, close_to_normal, normal_to_close;
+    Animation close_to_open, open_to_close, close_to_normal, normal_to_open, normal_to_close;
 
     close_to_open.setSpriteSheet(game->resource["orb"]);
     open_to_close.setSpriteSheet(game->resource["orb"]);
     close_to_normal.setSpriteSheet(game->resource["orb"]);
     normal_to_close.setSpriteSheet(game->resource["orb"]);
+    normal_to_open.setSpriteSheet(game->resource["orb"]);
 
     for(int i = 0; i < 4; i++)  close_to_open.addFrame(sf::IntRect(width * i, 0, width, height));
     for(int i = 3; i > -1; i--) open_to_close.addFrame(sf::IntRect(width * i, 0, width, height));
     for(int i = 0; i < 3; i++) open_to_close.addFrame(sf::IntRect(width * 0, 0, width, height));
     for(int i = 0; i < 3; i++)  close_to_normal.addFrame(sf::IntRect(width * i, 0, width, height));
     for(int i = 2; i > -1; i--) normal_to_close.addFrame(sf::IntRect(width * i, 0, width, height));
+    for(int i = 2; i < 4; i++) normal_to_open.addFrame(sf::IntRect(width * i, 0, width, height));
 
     auto& sprite = entity.getComponent<CAnimatedSprite>();
     sprite.setScale(scaleX, scaleY);
@@ -671,6 +673,7 @@ void createOrb(Game *game) {
     sprite.animations["open_to_close"] = open_to_close;
     sprite.animations["close_to_normal"] = close_to_normal;
     sprite.animations["normal_to_close"] = normal_to_close;
+    sprite.animations["normal_to_open"] = normal_to_open;
     sprite.setAnimation("normal_to_close");
 
     auto& cFlash = entity.addComponent<CFlash>();
