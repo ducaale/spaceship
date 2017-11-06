@@ -509,6 +509,9 @@ struct CGun : Component {
     int projShot = 0;
     Group group;
 
+    float scaleX = 1;
+    float scaleY = 1;
+
     CGun(Game *game, sf::Sprite sprite, float rateOfFire, float speed, Group group) :
         game(game),
         sprite(sprite),
@@ -521,12 +524,20 @@ struct CGun : Component {
         lastFired += elapsedTime;
     }
 
+    void setScale(float scaleX, float scaleY) {
+        this->scaleX = scaleX;
+        this->scaleY = scaleY;
+    }
+
     void fire(sf::Vector2f position, float angle, Group target_name=0) {
         if(lastFired > 1/rateOfFire) {
             auto& entity = game->manager.addEntity();
             auto& cTransform = entity.addComponent<CTransform>(position, angle);
             auto& cPhysics = entity.addComponent<CPhysics>(speed, speed, 0.f);
-            entity.addComponent<CSprite>(game, sprite);
+
+            auto& cSprite = entity.addComponent<CSprite>(game, sprite);
+            cSprite.setScale(scaleX, scaleY);
+
             auto& cTimerKiller = entity.addComponent<CTimerKiller>(5);
 
             auto& cCollision = entity.addComponent<CCollision>();
@@ -562,7 +573,7 @@ struct CGun : Component {
 
         if(target_name) {
             auto& cSprite = entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 32, 32);
-            cSprite.setScale(2.5f, 2.5f);
+            cSprite.setScale(3.5f, 3.5f);
 
             Animation rocket_impact;
             rocket_impact.setSpriteSheet(game->resource["guns"]);
