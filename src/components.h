@@ -507,6 +507,7 @@ struct CGun : Component {
     float rateOfFire, speed;
     float lastFired = 0.f;
     int projShot = 0;
+    int hit = 0;
     Group group;
 
     float scaleX = 1;
@@ -541,7 +542,7 @@ struct CGun : Component {
             auto& cTimerKiller = entity.addComponent<CTimerKiller>(5);
 
             auto& cCollision = entity.addComponent<CCollision>();
-            cCollision.onCollision = [this, &entity, &cTransform, target_name] (Entity& e) {
+            cCollision.onCollision = [this, &entity, &cTransform, target_name] (Entity& other) {
                 this->onCollision(cTransform.position, cTransform.angle, target_name);
                 entity.destroy();
 
@@ -552,6 +553,9 @@ struct CGun : Component {
                     else {
                         other.getComponent<CHealth>().loseHealth(1);
                     }
+                }
+                if(other.hasGroup(Groups::enemy)) {
+                    std::cout << ++hit << std::endl;
                 }
             };
 
