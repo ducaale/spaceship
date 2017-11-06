@@ -59,6 +59,7 @@ Game::Game() {
         {Groups::enemy, Groups::enemy},
         {Groups::enemy, Groups::enemy_bullet},
         {Groups::enemy_bullet, Groups::enemy_bullet},
+        {Groups::enemy, Groups::enemy_laser},
         {Groups::player, Groups::player_bullet},
         {Groups::player_bullet, Groups::player_bullet}
     };

@@ -520,6 +520,11 @@ struct CLaserGun : Component {
 
     Entity *laser = nullptr;
 
+    float width = 1.3f;
+    float length = 4.5f;
+
+    float lastOpened = 0;
+
     enum States : std::size_t {
         opening,
         on,
@@ -536,6 +541,7 @@ struct CLaserGun : Component {
 
     void update(float elapsedTime) override {
         if(state == States::closing) {
+            lastOpened = 0;
 
             auto& laserSprite = laser->getComponent<CSprite>();
 
@@ -545,6 +551,16 @@ struct CLaserGun : Component {
                 state = States::off;
                 laser->destroy();
             }
+        }
+        else if(state == States::on) {
+            lastOpened += elapsedTime;
+
+            auto& laserSprite = laser->getComponent<CSprite>();
+
+            auto theta = lastOpened / 0.04f;
+            auto deltaWidth = 0.8 * sin(theta);
+            deltaWidth = utility::clamp(deltaWidth, 0, deltaWidth);
+            laserSprite.setScale(length, width + deltaWidth);
         }
     }
 
@@ -556,9 +572,19 @@ struct CLaserGun : Component {
 
             auto& laserSprite = laser->addComponent<CSprite>(game, sprite);
             laserSprite.setOrigin(laserSprite.width(), laserSprite.height()/2);
-            laserSprite.setScale(2.5f, 1.3f);
+            laserSprite.setScale(length, width);
+
+
+            auto& cCollision = laser->addComponent<CCollision>();
+            cCollision.onCollision = [] (Entity& other) {
+                if(other.hasComponent<CHealth>()) {
+                    other.getComponent<CHealth>().loseHealth(5);
+                }
+            };
 
             laser->addGroup(Groups::drawable);
+            laser->addGroup(Groups::collidable);
+            laser->addGroup(Groups::enemy_laser);
 
             state = States::on;
         }
