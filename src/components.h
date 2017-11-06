@@ -257,6 +257,90 @@ struct CAnimatedSprite  : BaseSprite<AnimatedSprite> {
     }
 };
 
+struct CTimerKiller : Component {
+
+    float counter = 0;
+    float end;
+
+    CTimerKiller(float end) : end(end) {}
+
+    void update(float elapsedTime) override {
+        counter += elapsedTime;
+
+        if(counter > end) entity->destroy();
+    }
+};
+
+struct CExplosion : Component {
+
+    Game *game = nullptr;
+
+    CExplosion(Game *game) : game(game) {}
+
+    void explode() {
+
+        auto position = entity->getComponent<CTransform>().position;
+
+        auto& explosion_entity = game->manager.addEntity();
+        explosion_entity.addComponent<CTransform>(position);
+        explosion_entity.addComponent<CTimerKiller>(0.45f);
+        auto& cSprite = explosion_entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 32, 32);
+        cSprite.setScale(2.5f, 2.5f);
+
+        Animation explosion;
+        explosion.setSpriteSheet(game->resource["guns"]);
+        for(int k = 0; k < 2; k++) explosion.addFrame(sf::IntRect(0,192,64,64));
+        for(int k = 0; k < 4; k++) explosion.addFrame(sf::IntRect(64,192,64,64));
+
+        cSprite.animations["explosion"] = explosion;
+        cSprite.setAnimation("explosion");
+
+        explosion_entity.addGroup(Groups::drawable);
+        explosion_entity.setLayer(2);
+    }
+};
+
+struct CHealth : Component {
+    int health;
+    float lastHit = 0;
+    float invincibleFrames = 3.f;
+
+    bool isInvincible = false;
+
+    CHealth(int health) : health(health) {}
+
+    void update(float elapsedTime) override {
+        if(isInvincible) {
+            lastHit += elapsedTime;
+
+            if(lastHit > invincibleFrames) {
+                isInvincible = false;
+                lastHit = 0;
+            }
+        }
+    }
+
+    int isAlive() { return health > 0; }
+
+    void loseHealth(int amount) {
+        if(isInvincible || !isAlive()) return;
+
+        health = amount > health ? 0 : health - amount;
+
+        if(!isAlive()) onDeath();
+
+        isInvincible = true;
+
+        if(!isAlive()) entity->delGroup(Groups::drawable);
+    }
+
+    void onDeath() {
+        if(entity->hasComponent<CExplosion>()) {
+            entity->getComponent<CExplosion>().explode();
+        }
+    }
+};
+
 /*
  * https://gist.github.com/JISyed/6445974
  */
@@ -329,20 +413,6 @@ struct CTarget : Component {
 
     }
 
-};
-
-struct CTimerKiller : Component {
-
-    float counter = 0;
-    float end;
-
-    CTimerKiller(float end) : end(end) {}
-
-    void update(float elapsedTime) override {
-        counter += elapsedTime;
-
-        if(counter > end) entity->destroy();
-    }
 };
 
 struct CGradualTransparency : Component {
