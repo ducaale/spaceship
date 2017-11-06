@@ -3,17 +3,20 @@
 
 enum Events : std::size_t {
     //orb actions
-    orb_start_firing,
-    orb_end_firing,
 
-    orb_open_laser,
-    orb_close_laser,
+    orb_start_firing = 0,
+    orb_end_firing = 1,
 
-    orb_start_targeting,
-    orb_end_targeting,
+    orb_open_laser = 2,
+    orb_close_laser = 3,
 
-    orb_start_lunching_rockets,
-    orb_end_lunching_rockets,
+    orb_start_targeting = 4,
+    orb_end_targeting = 5,
+
+    orb_start_lunching_rockets = 6,
+    orb_end_lunching_rockets = 7,
+
+    orb_teleport = 8
 };
 
 
