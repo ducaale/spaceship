@@ -283,9 +283,18 @@ struct CRLBehaviour: Component, public Observer {
 };
 
 struct COrbBehaviour : Component, public Observer {
+    Entity* player = nullptr;
     CLaserGun *cLaserGun = nullptr;
     CAnimatedSprite *cSprite = nullptr;
     CTarget *cTarget = nullptr;
+    CTransform *cTransform = nullptr;
+
+    int positionIndex = 0;
+    std::vector<sf::Vector2f> positions = {{0.f, 1.f}, {1.f, 0.f}, {0.f, -1.f}, {-1.f, 0.f}};
+    sf::Vector2f nextPosition;
+    sf::Vector2f lastPosition;
+    bool isMoving = false;
+    float lastMove = 0.f;
 
     enum States : std::size_t {
         none,
@@ -297,15 +306,19 @@ struct COrbBehaviour : Component, public Observer {
         open_to_close,
         close_to_normal,
         start_targeting,
-        end_targeting
+        end_targeting,
+        teleport
     };
 
     States currentState = States::none;
+
+    COrbBehaviour(Game *game) : player(game->manager.getByGroup(Groups::player)) {}
 
     void init() override {
         cLaserGun = &entity->getComponent<CLaserGun>();
         cSprite = &entity->getComponent<CAnimatedSprite>();
         cTarget = &entity->getComponent<CTarget>();
+        cTransform = &entity->getComponent<CTransform>();
     }
 
     void nextAction(float elapsedTime) {
@@ -370,9 +383,18 @@ struct COrbBehaviour : Component, public Observer {
                 currentState = States::completed;
                 break;
 
+            case States::teleport:
+                teleport_orb();
+                currentState = States::completed;
+                break;
+
             default:
                 break;
         }
+
+        if(isMoving) move(elapsedTime);
+
+        if(utility::magnitude(cTransform->position, player->getComponent<CTransform>().position) < 300) teleport_orb();
     }
 
     void onNotify(Events event, float sleep, std::function<void()> next) override {
@@ -393,9 +415,12 @@ struct COrbBehaviour : Component, public Observer {
             case Events::orb_end_targeting:
                 currentState = States::end_targeting;
                 break;
+            case Events::orb_teleport:
+                currentState = States::teleport;
             default:
                 break;
         }
+
     }
 
     void openLaser() {
@@ -412,6 +437,25 @@ struct COrbBehaviour : Component, public Observer {
 
     void  disableTargeting() {
         cTarget->disableTargeting();
+    }
+
+    void teleport_orb() {
+        if(isMoving) return;
+
+        sf::Vector2f offset = positions[(++positionIndex % positions.size())] * 900.f;
+        lastPosition = cTransform->position;
+        nextPosition = player->getComponent<CTransform>().position + offset;
+        isMoving = true;
+        lastMove = 0.f;
+    }
+
+    void move(float elapsedTime) {
+        float movement_duration = 3.f;
+        lastMove += elapsedTime;
+
+        cTransform->position = utility::lerp(utility::smootherStep(lastMove/movement_duration), lastPosition, nextPosition);
+
+        isMoving = utility::magnitude(cTransform->position, nextPosition) > 10.f;
     }
 };
 
