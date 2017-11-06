@@ -27,11 +27,13 @@ struct COrbArmBehaviour: Component, public Observer {
     enum States : std::size_t {
         none,
         completed,
+        starting_to_fire,
         firing,
+        ending_fire,
         not_firing
     };
 
-    States currentState = States::none;
+    States currentState = States::not_firing;
 
     COrbArmBehaviour(Game* game) : game(game) {}
 
@@ -48,7 +50,17 @@ struct COrbArmBehaviour: Component, public Observer {
         counter += elapsedTime;
 
         if(counter > sleep && next) {
-            currentState = States::none;
+
+            switch(currentState) {
+                case States::starting_to_fire:
+                    currentState = States::firing;
+                    break;
+                case States:: ending_fire:
+                    currentState = States::not_firing;
+                    break;
+                default:
+                    break;
+            }
 
             // only one arm should notify the ai
             if(side == Side::left) return;
@@ -60,14 +72,24 @@ struct COrbArmBehaviour: Component, public Observer {
 
     void update(float elapsedTime) override {
         switch(currentState) {
-            case States::firing:
+            case States::starting_to_fire:
                 target(elapsedTime);
                 fire();
                 nextAction(elapsedTime);
                 break;
 
-            case States::not_firing:
+            case States::firing:
+                target(elapsedTime);
+                fire();
+                break;
+
+            case States::ending_fire:
+                reposition(elapsedTime);
                 nextAction(elapsedTime);
+                break;
+
+            case States::not_firing:
+                reposition(elapsedTime);
                 break;
 
             default:
@@ -129,10 +151,10 @@ struct COrbArmBehaviour: Component, public Observer {
 
         switch(event) {
             case Events::orb_start_firing:
-                currentState = States::firing;
+                currentState = States::starting_to_fire;
                 break;
             case Events::orb_end_firing:
-                currentState = States::not_firing;
+                currentState = States::ending_fire;
                 break;
             default:
                 break;
