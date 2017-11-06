@@ -301,6 +301,7 @@ struct COrbBehaviour : Component, public Observer {
         completed,
         normal_to_close,
         close_to_open,
+        normal_to_open,
         open_laser,
         close_laser,
         open_to_close,
@@ -344,6 +345,12 @@ struct COrbBehaviour : Component, public Observer {
             case States::close_to_open:
                 cSprite->sprite.stop();
                 cSprite->play("close_to_open", [&]() { currentState = States::open_laser; });
+                currentState = States::none;
+                break;
+
+            case States::normal_to_open:
+                cSprite->sprite.stop();
+                cSprite->play("normal_to_open", [&]() { currentState = States::open_laser; });
                 currentState = States::none;
                 break;
 
@@ -424,7 +431,7 @@ struct COrbBehaviour : Component, public Observer {
     }
 
     void openLaser() {
-        currentState = States::normal_to_close;
+        currentState = States::normal_to_open;
     }
 
     void closeLaser() {
