@@ -32,6 +32,7 @@ public:
     AI ai;
 
     std::map<std::string, sf::Texture> resource;
+    sf::Font font;
 
 private:
     sf::RenderWindow window{{800,600}, "Spaceship"};

@@ -34,6 +34,10 @@ void Game::loadResources() {
     if(!texture->loadFromFile("../spritesheet/rocks.png")) {
         std::cout << "unable to load file" << std::endl;
     }
+
+    if(!font.loadFromFile("../fonts/ARCADECLASSIC.ttf")) {
+        std::cout << "unable to load font" << std::endl;
+    }
 }
 
 Game::Game() {
