@@ -10,12 +10,94 @@
 
 using json = nlohmann::json;
 
+struct CThruster : Component {
+
+    Game* game = nullptr;
+    CAnimatedSprite* cSprite = nullptr;
+    CHealth* cHealth = nullptr;
+    bool boosterOn = false;
+
+    CThruster(Game* game) : game(game) {}
+
+    void init() override {
+        cSprite = &entity->getComponent<CAnimatedSprite>();
+        cHealth = &game->manager.getByGroup(Groups::player)->getComponent<CHealth>();
+    }
+
+    void update(float elapsedTime) override {
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || boosterOn) {
+            entity->addGroup(Groups::drawable);
+
+            if(boosterOn) {
+                cSprite->setScale(0.35f, 0.45f);
+            }
+            else {
+                cSprite->setScale(0.15f, 0.25f);
+            }
+        }
+        else {
+            entity->delGroup(Groups::drawable);
+        }
+
+        if(!cHealth->isAlive()) entity->delGroup(Groups::drawable);
+    }
+};
+
+struct CPlayerBoost : Component {
+    Game *game = nullptr;
+    CPhysics *cPhysics = nullptr;
+    float normal_acceleration;
+    float normal_max_speed;
+
+    bool boosterOn = false;
+    float boostDuration = 1.f;
+    float boostRecharge = 3.f;
+    float lastBoost = boostRecharge;
+
+    CPlayerBoost(Game *game) : game(game) {}
+
+    void init() override {
+        cPhysics = &entity->getComponent<CPhysics>();
+        normal_acceleration = cPhysics->acceleration;
+        normal_max_speed = cPhysics->maxSpeed;
+    }
+
+    void update(float elapsedTime) {
+        lastBoost += elapsedTime;
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
+            if(lastBoost > boostRecharge) {
+                lastBoost = 0;
+                boosterOn = true;
+            }
+        }
+
+        if(lastBoost > boostDuration) {
+            boosterOn = false;
+        }
+
+        if(boosterOn) {
+            game->manager.getByGroup(Groups::thruster)->getComponent<CThruster>().boosterOn = true;
+            cPhysics->acceleration = 400.f;
+            cPhysics->maxSpeed = 400.f;
+        }
+        else {
+            game->manager.getByGroup(Groups::thruster)->getComponent<CThruster>().boosterOn = false;
+            cPhysics->acceleration = normal_acceleration;
+            cPhysics->maxSpeed = normal_max_speed;
+        }
+    }
+};
+
 struct CPlayerMovement : Component {
 
     CTransform *cTransform = nullptr;
     CPhysics *cPhysics = nullptr;
     CSprite *cSprite = nullptr;
     CGun *cGun = nullptr;
+    CHealth *cHealth = nullptr;
+    CPlayerBoost *cPlayerBoost = nullptr;
 
     float turn_speed = 0;
 
@@ -26,6 +108,8 @@ struct CPlayerMovement : Component {
         cPhysics = &entity->getComponent<CPhysics>();
         cSprite = &entity->getComponent<CSprite>();
         cGun = &entity->getComponent<CGun>();
+        cHealth = &entity->getComponent<CHealth>();
+        cPlayerBoost = &entity->getComponent<CPlayerBoost>();
     }
 
     void changeView() {
@@ -44,21 +128,24 @@ struct CPlayerMovement : Component {
 
     void update(float elapsedTime) override {
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
-            fire();
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-            cTransform->angle -= (turn_speed * elapsedTime );
-            changeView();
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-            cTransform->angle += (turn_speed * elapsedTime );
-            changeView();
+        if(cHealth->isAlive()) {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
+                fire();
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+                cTransform->angle -= (turn_speed * elapsedTime );
+                changeView();
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+                cTransform->angle += (turn_speed * elapsedTime );
+                changeView();
+            }
+
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || cPlayerBoost->boosterOn) {
+                cPhysics->accelerate(elapsedTime);
+            }
         }
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            cPhysics->accelerate(elapsedTime);
-        }
         cPhysics->deccelerate(elapsedTime);
     }
 
@@ -77,30 +164,35 @@ struct CPlayerMovement : Component {
     }
 };
 
-struct CThruster : Component {
+struct CHUD : Component {
+    Game *game = nullptr;
+    CHealth *cHealth = nullptr;
+    sf::Text text;
 
-    CAnimatedSprite* cSprite = nullptr;
+    CHUD(Game *game) : game(game) {
+        text.setFont(game->font);
+        text.setCharacterSize(24);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(50, 20);
+    }
 
     void init() override {
-        cSprite = &entity->getComponent<CAnimatedSprite>();
+        cHealth = &entity->getComponent<CHealth>();
     }
 
     void update(float elapsedTime) override {
+        text.setString(std::to_string(cHealth->health));
+    }
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-            entity->addGroup(Groups::drawable);
-            //cSprite->play("thrusterAnimation");
-        }
-        else {
-            entity->delGroup(Groups::drawable);
-        }
+    void draw() override {
+        game->renderHUD(text);
     }
 };
 
 void createThruster(Game *game, Entity& parent) {
     auto& entity = game->manager.addEntity();
 
-    entity.addComponent<CTransform>(sf::Vector2f(40.f, 0.f));
+    entity.addComponent<CTransform>(sf::Vector2f(30.f, 0.f));
     entity.addComponent<CParent>(&parent);
 
     float width = 160.f;
@@ -119,13 +211,15 @@ void createThruster(Game *game, Entity& parent) {
     auto& cSprite = entity.getComponent<CAnimatedSprite>();
 
     cSprite.setScale(scaleX, scaleY);
+    cSprite.setOrigin(0, height/2);
 
     cSprite.animations["thrusterAnimation"] = thrusterAnimation;
 
     cSprite.setAnimation("thrusterAnimation");
 
-    entity.addComponent<CThruster>();
+    entity.addComponent<CThruster>(game);
 
+    entity.addGroup(Groups::thruster);
 }
 
 void createPlayer(Game *game) {
@@ -147,8 +241,10 @@ void createPlayer(Game *game) {
     auto& entity = game->manager.addEntity();
 
     entity.addComponent<CTransform>(position, angle);
+    entity.addComponent<CHealth>(20);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["player"], {0,0,160,70}));
     entity.addComponent<CPhysics>(max_speed, 0.f, acceleration);
+    entity.addComponent<CPlayerBoost>(game);
     entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::player_bullet);
 
     auto& cSprite = entity.getComponent<CSprite>();
@@ -157,15 +253,18 @@ void createPlayer(Game *game) {
     cSprite.frames["left"] = std::make_tuple(sf::IntRect(320,0,160,70), sf::Vector2f(80.f, 32.f), sf::Vector2f(0.4f, 0.4f));
     cSprite.changeFrame("right");
 
+    entity.addComponent<CExplosion>(game);
     entity.addComponent<CPlayerMovement>(turn_speed);
+
+    entity.addComponent<CHUD>(game);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::player);
     entity.addGroup(Groups::collidable);
 
-    createThruster(game, entity);
-
     game->manager.refresh();
+
+    createThruster(game, entity);
 }
 
 
