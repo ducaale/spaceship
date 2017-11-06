@@ -1,8 +1,14 @@
 #ifndef AI_H
 #define AI_H
 
+#include <fstream>
+
 #include "subject.h"
 #include "events.h"
+
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 class AI : public Subject {
 private:
@@ -11,16 +17,14 @@ private:
 
 public:
     AI() {
-        orders.push_back(std::make_pair(Events::orb_start_firing, 8));
-        orders.push_back(std::make_pair(Events::orb_end_firing, 0));
+        //load values from json file
+        std::ifstream file("values.json");
+        json values;
+        file >> values;
 
-        orders.push_back(std::make_pair(Events::orb_end_targeting, 0));
-        orders.push_back(std::make_pair(Events::orb_open_laser, 2));
-        orders.push_back(std::make_pair(Events::orb_close_laser, 0));
-        orders.push_back(std::make_pair(Events::orb_start_targeting, 2));
-
-        orders.push_back(std::make_pair(Events::orb_start_lunching_rockets, 3));
-        orders.push_back(std::make_pair(Events::orb_end_lunching_rockets, 2));
+        for(auto& value : values["orb_ai"][0]) {
+            orders.push_back({value["event"], value["duration"]});
+        }
     }
 
     void next() {
