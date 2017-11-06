@@ -495,7 +495,7 @@ struct CRocketBehaviour : Component {
         auto playerPos = player->getComponent<CTransform>().position;
         auto currentPos = cTransform->position;
 
-        if(utility::magnitude(currentPos, playerPos) < 100) {
+        if(utility::magnitude(currentPos, playerPos) < 110) {
             cCollision->onCollision(*player);
         }
     }
