@@ -544,6 +544,15 @@ struct CGun : Component {
             cCollision.onCollision = [this, &entity, &cTransform, target_name] (Entity& e) {
                 this->onCollision(cTransform.position, cTransform.angle, target_name);
                 entity.destroy();
+
+                if(other.hasComponent<CHealth>()) {
+                    if(target_name) {
+                        other.getComponent<CHealth>().loseHealth(2);
+                    }
+                    else {
+                        other.getComponent<CHealth>().loseHealth(1);
+                    }
+                }
             };
 
             if(target_name) {
