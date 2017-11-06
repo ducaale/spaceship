@@ -10,6 +10,7 @@
 
 #include "player.h"
 #include "orb.h"
+#include "rocks.h"
 
 void Game::loadResources() {
     sf::Texture *texture;
@@ -28,6 +29,11 @@ void Game::loadResources() {
     if(!texture->loadFromFile("../spritesheet/guns.png")) {
         std::cout << "unable to load file" << std::endl;
     }
+
+    texture  = &resource["rocks"];
+    if(!texture->loadFromFile("../spritesheet/rocks.png")) {
+        std::cout << "unable to load file" << std::endl;
+    }
 }
 
 Game::Game() {
@@ -38,6 +44,7 @@ Game::Game() {
 
     createPlayer(this);
     createOrb(this);
+    createRocks(this);
 
     ai.init();
 
