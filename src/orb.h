@@ -564,6 +564,12 @@ Entity& createRightRL(Game *game, Entity& parent) {
     entity.addComponent<CParent>(&parent);
 
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
+
+    auto& cFlash = entity.addComponent<CFlash>();
+
+    auto& cCollision = entity.addComponent<CCollision>();
+    cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
+
     cSprite.setScale(scaleX, scaleY);
 
     auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
@@ -603,7 +609,11 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {128,128,32,64}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    auto& cFlash = entity.addComponent<CFlash>();
+
+    auto& cCollision = entity.addComponent<CCollision>();
+    cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
+
     auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     cGun.setScale(1.5f, 1.5f);
 
