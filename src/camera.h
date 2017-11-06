@@ -12,11 +12,13 @@ public:
     Camera(Manager& manager, sf::RenderWindow& w);
     void update(float elapsedTime);
 
+    sf::View view{{0, 0,800, 600}};
+    sf::View HUDview{{0, 0,800, 600}};
+
 private:
     Manager& manager;
 
     sf::RenderWindow& window;
-    sf::View view{{0, 0,800, 600}};
 
     sf::Vector2f coordinate;
     sf::Vector2f scale;

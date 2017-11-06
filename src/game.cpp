@@ -97,6 +97,14 @@ void Game::render(const sf::Drawable& drawable, const sf::Transform& t) {
     window.draw(drawable, t);
 }
 
+void Game::renderHUD(const sf::Drawable& drawable) {
+    window.setView(camera->HUDview);
+
+    window.draw(drawable);
+
+    window.setView(camera->view);
+}
+
 int main() {
     Game().run();
     return 0;

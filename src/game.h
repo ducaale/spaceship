@@ -23,6 +23,7 @@ public:
     void drawPhase();
 
     void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
+    void renderHUD(const sf::Drawable& drawable);
 
     void loadResources();
 
