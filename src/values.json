@@ -6,7 +6,7 @@
         },
         "initial_angle" : 180,
         "max_speed": 200.0,
-        "acceleration": 150.0,
+        "acceleration": 100.0,
         "turn_speed": 150.0,
 
         "gun": {
@@ -21,22 +21,77 @@
             "y": 200.0
         },
         "initial_angle" : 0,
-        "turn_speed": 35,
-        "targeting_accuracy": 0.99
+        "turn_speed": 40,
+        "targeting_accuracy": 0.9
     },
 
     "orb_arm": {
         "gun": {
-            "speed": 300.0,
-            "bullets_per_second": 4.0
+            "speed": 250.0,
+            "bullets_per_second": 3.0
         }
     },
 
     "orb_rocket_luncher": {
         "gun": {
-            "speed": 200.0,
+            "speed": 350.0,
             "bullets_per_second": 1
         }
 
-    }
+    },
+    "orb_ai": [
+        [
+            {"event": 0, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 1, "duration": 1},
+
+            {"event": 8, "duration": 2},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 0},
+            {"event": 5, "duration": 1},
+            {"event": 2, "duration": 1},
+            {"event": 3, "duration": 1},
+
+            {"event": 4, "duration": 2},
+            {"event": 6, "duration": 3},
+            {"event": 7, "duration": 2},
+
+            {"event": 8, "duration": 2}
+        ]
+    ]
 }
