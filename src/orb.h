@@ -685,7 +685,7 @@ void createOrb(Game *game) {
 
     entity.addComponent<CTarget>(game, Groups::player, turn_speed, targeting_accuracy);
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["guns"], {0,128,512,32}));
-    auto& orbBehaviour = entity.addComponent<COrbBehaviour>();
+    auto& orbBehaviour = entity.addComponent<COrbBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
