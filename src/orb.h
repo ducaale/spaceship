@@ -491,7 +491,9 @@ Entity& createRightArm(Game *game, Entity& parent) {
     auto& cCollision = entity.addComponent<CCollision>();
     cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    cGun.setScale(1.5f, 1.5f);
+
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -529,7 +531,9 @@ Entity& createLeftArm(Game *game, Entity& parent) {
     auto& cCollision = entity.addComponent<CCollision>();
     cCollision.onCollision = [&cFlash](Entity& e) { cFlash.flash(); };
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    cGun.setScale(1.5f, 1.5f);
+
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -562,7 +566,9 @@ Entity& createRightRL(Game *game, Entity& parent) {
     auto& cSprite = entity.addComponent<CSprite>(game, sf::Sprite(game->resource["orb"], {0,128,32,64}));
     cSprite.setScale(scaleX, scaleY);
 
-    entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    cGun.setScale(1.5f, 1.5f);
+
     auto& behaviour = entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
 
     entity.addGroup(Groups::drawable);
@@ -598,6 +604,9 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     cSprite.setScale(scaleX, scaleY);
 
     entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
+    cGun.setScale(1.5f, 1.5f);
+
     auto& behaviour = entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
 
     entity.addGroup(Groups::drawable);
