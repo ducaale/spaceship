@@ -4,9 +4,11 @@
 enum Groups : std::size_t {
     none,
     player,
+    thruster,
     bullet,
     player_bullet,
     enemy_bullet,
+    enemy_laser,
     enemy,
     drawable,
     collidable,
