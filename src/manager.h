@@ -68,7 +68,7 @@ public:
                 });
         }
 
-        for(int i = 0; i < maxGroups; i++) {
+        for(auto i = 0u; i < maxGroups; i++) {
             auto& v = groupedEntities[i];
             v.erase(
                 std::remove_if(std::begin(v), std::end(v),
