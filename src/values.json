@@ -5,13 +5,13 @@
             "y": 0.0
         },
         "initial_angle" : 180,
-        "max_speed": 200.0,
-        "acceleration": 100.0,
+        "max_speed": 600.0,
+        "acceleration": 400.0,
         "turn_speed": 150.0,
 
         "gun": {
-            "speed": 300.0,
-            "bullets_per_second": 4.0
+            "speed": 400.0,
+            "bullets_per_second": 15.0
         }
     },
 
@@ -27,8 +27,8 @@
 
     "orb_arm": {
         "gun": {
-            "speed": 250.0,
-            "bullets_per_second": 3.0
+            "speed": 150.0,
+            "bullets_per_second": 10.0
         }
     },
 
@@ -67,6 +67,8 @@
             {"event": 2, "duration": 1},
             {"event": 3, "duration": 1},
 
+            {"event": 8, "duration": 2},
+
             {"event": 4, "duration": 0},
             {"event": 5, "duration": 1},
             {"event": 2, "duration": 1},
@@ -90,8 +92,8 @@
             {"event": 4, "duration": 2},
             {"event": 6, "duration": 3},
             {"event": 7, "duration": 2},
-
             {"event": 8, "duration": 2}
+
         ]
     ]
 }
