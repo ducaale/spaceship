@@ -609,7 +609,6 @@ struct CGun : Component {
     float rateOfFire, speed;
     float lastFired = 0.f;
     int projShot = 0;
-    int hit = 0;
     Group group;
 
     float scaleX = 1;
@@ -633,51 +632,54 @@ struct CGun : Component {
     }
 
     void fire(sf::Vector2f position, float angle, Group target_name=0) {
-        if(lastFired > 1/rateOfFire) {
-            auto& entity = game->manager.addEntity();
-            auto& cTransform = entity.addComponent<CTransform>(position, angle);
-            auto& cPhysics = entity.addComponent<CPhysics>(speed, speed, 0.f);
+        if(lastFired < 1/rateOfFire) return;
 
-            auto& cSprite = entity.addComponent<CSprite>(game, sprite);
-            cSprite.setScale(scaleX, scaleY);
+        auto& entity = game->manager.addEntity();
+        auto& cTransform = entity.addComponent<CTransform>(position, angle);
+        auto& cPhysics = entity.addComponent<CPhysics>(speed, speed, 0.f);
 
-            auto& cTimerKiller = entity.addComponent<CTimerKiller>(5);
+        auto& cSprite = entity.addComponent<CSprite>(game, sprite);
+        cSprite.setScale(scaleX, scaleY);
 
-            auto& cCollision = entity.addComponent<CCollision>();
-            cCollision.onCollision = [this, &entity, &cTransform, target_name] (Entity& other) {
-                this->onCollision(cTransform.position, cTransform.angle, target_name);
-                entity.destroy();
+        auto& cTimerKiller = entity.addComponent<CTimerKiller>(5);
 
-                if(other.hasComponent<CHealth>()) {
-                    if(target_name) {
-                        other.getComponent<CHealth>().loseHealth(2);
-                    }
-                    else {
-                        other.getComponent<CHealth>().loseHealth(1);
-                    }
+        auto& cCollision = entity.addComponent<CCollision>();
+        cCollision.onCollision = [this, &entity, &cTransform, target_name] (Entity& other) {
+            this->onCollision(cTransform.position, cTransform.angle, target_name);
+            entity.destroy();
+
+            if(other.hasComponent<CHealth>()) {
+                if(target_name) {
+                    other.getComponent<CHealth>().loseHealth(2);
                 }
-                if(other.hasGroup(Groups::enemy)) {
-                    std::cout << ++hit << std::endl;
+                else {
+                    other.getComponent<CHealth>().loseHealth(1);
                 }
-            };
-
-            if(target_name) {
-                entity.addComponent<CTarget>(game, target_name, 15.f, 1.f);
-                entity.addComponent<CRocketBehaviour>(game);
-                //entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["guns"], {0,130,8,8}));
-
-                cPhysics.speed /= 2.f;
-                cTimerKiller.end *= 3;
             }
+            if(other.hasComponent<CSharedHealth>()) {
+                other.getComponent<CSharedHealth>().loseHealth(1);
+            }
+        };
 
-            entity.addGroup(Groups::drawable);
-            entity.addGroup(Groups::collidable);
-            entity.addGroup(Groups::bullet);
-            entity.addGroup(group);
+        if(target_name) {
+            entity.addComponent<CTarget>(game, target_name, 15.f, 1.f);
+            entity.addComponent<CRocketBehaviour>(game);
+            //entity.addComponent<CPathTrail>(game, sf::Sprite(game->resource["guns"], {0,130,8,8}));
 
-            lastFired = 0.f;
-            ++projShot;
+            cPhysics.speed /= 2.f;
+            cTimerKiller.end *= 3;
         }
+
+        //auto& cMuzzleFlash = entity.addComponent<CMuzzleFlash>(game);
+        //cMuzzleFlash.fire(position);
+
+        entity.addGroup(Groups::drawable);
+        entity.addGroup(Groups::collidable);
+        entity.addGroup(Groups::bullet);
+        entity.addGroup(group);
+
+        lastFired = 0.f;
+        ++projShot;
     }
 
     void onCollision(sf::Vector2f position, float angle, Group target_name) {
@@ -759,8 +761,10 @@ struct CLaserGun : Component {
 
             auto& laserSprite = laser->getComponent<CSprite>();
 
-            auto theta = lastOpened / 0.04f;
-            auto deltaWidth = 0.8 * sin(theta);
+            auto period = 0.04f;
+            auto amplitude = 0.8;
+            auto theta = lastOpened / period;
+            auto deltaWidth = amplitude * sin(theta);
             deltaWidth = utility::clamp(deltaWidth, 0, deltaWidth);
             laserSprite.setScale(length, width + deltaWidth);
         }
@@ -775,7 +779,6 @@ struct CLaserGun : Component {
             auto& laserSprite = laser->addComponent<CSprite>(game, sprite);
             laserSprite.setOrigin(laserSprite.width(), laserSprite.height()/2);
             laserSprite.setScale(length, width);
-
 
             auto& cCollision = laser->addComponent<CCollision>();
             cCollision.onCollision = [] (Entity& other) {
