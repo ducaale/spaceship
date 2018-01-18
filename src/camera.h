@@ -10,6 +10,7 @@
 class Camera {
 public:
     Camera(Manager& manager, sf::RenderWindow& w);
+    ~Camera();
     void update(float elapsedTime);
 
     sf::View view{{0, 0,800, 600}};
