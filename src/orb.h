@@ -494,6 +494,8 @@ Entity& createRightArm(Game *game, Entity& parent) {
     auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     cGun.setScale(1.5f, 1.5f);
 
+    entity.addComponent<CSharedHealth>();
+    entity.addComponent<CExplosion>(game);
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -534,6 +536,8 @@ Entity& createLeftArm(Game *game, Entity& parent) {
     auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,0,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     cGun.setScale(1.5f, 1.5f);
 
+    entity.addComponent<CSharedHealth>();
+    entity.addComponent<CExplosion>(game);
     auto& orbBehaviour = entity.addComponent<COrbArmBehaviour>(game);
 
     entity.addGroup(Groups::drawable);
@@ -575,6 +579,8 @@ Entity& createRightRL(Game *game, Entity& parent) {
     auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     cGun.setScale(1.5f, 1.5f);
 
+    entity.addComponent<CSharedHealth>();
+    entity.addComponent<CExplosion>(game);
     auto& behaviour = entity.addComponent<CRLBehaviour>(-48.f, -102.f, -80.f);
 
     entity.addGroup(Groups::drawable);
@@ -617,6 +623,8 @@ Entity& createLeftRL(Game *game, Entity& parent) {
     auto& cGun = entity.addComponent<CGun>(game, sf::Sprite(game->resource["guns"], {0,128,32,16}), bullets_per_second, gun_speed, Groups::enemy_bullet);
     cGun.setScale(1.5f, 1.5f);
 
+    entity.addComponent<CSharedHealth>();
+    entity.addComponent<CExplosion>(game);
     auto& behaviour = entity.addComponent<CRLBehaviour>(49.f, 103.f, 80.f);
 
     entity.addGroup(Groups::drawable);
@@ -629,6 +637,31 @@ Entity& createLeftRL(Game *game, Entity& parent) {
 
     return entity;
 }
+
+struct CEnemyHUD : Component {
+    Game *game = nullptr;
+    CHealth *cHealth = nullptr;
+    sf::Text text;
+
+    CEnemyHUD(Game *game) : game(game) {
+        text.setFont(game->font);
+        text.setCharacterSize(24);
+        text.setFillColor(sf::Color::White);
+        text.setPosition(640, 540);
+    }
+
+    void init() override {
+        cHealth = &entity->getComponent<CHealth>();
+    }
+
+    void update(float elapsedTime) override {
+        text.setString(std::to_string(cHealth->health) + " / " + std::to_string(cHealth->maxHealth));
+    }
+
+    void draw() override {
+        game->renderHUD(text);
+    }
+};
 
 void createOrb(Game *game) {
 
@@ -649,6 +682,7 @@ void createOrb(Game *game) {
     float scaleX = 1.5f, scaleY = 1.5f;
 
     entity.addComponent<CTransform>(position, angle);
+    entity.addComponent<CHealth>(game, 999, 0);
     entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.2), true, false), width/2, height/2);
 
     Animation close_to_open, open_to_close, close_to_normal, normal_to_open, normal_to_close;
@@ -687,6 +721,9 @@ void createOrb(Game *game) {
     entity.addComponent<CLaserGun>(game, sf::Sprite(game->resource["guns"], {0,128,512,32}));
     auto& orbBehaviour = entity.addComponent<COrbBehaviour>(game);
 
+    entity.addComponent<CExplosion>(game);
+    entity.addComponent<CEnemyHUD>(game);
+
     entity.addGroup(Groups::drawable);
     entity.addGroup(Groups::collidable);
     entity.addGroup(Groups::orb);
@@ -695,10 +732,13 @@ void createOrb(Game *game) {
 
     game->ai.addObserver(&orbBehaviour);
 
-    createLeftArm(game, entity);
-    createRightArm(game, entity);
-    createRightRL(game, entity);
-    createLeftRL(game, entity);
+    auto *rightArm = &createRightArm(game, entity);
+    auto *leftArm = &createLeftArm(game, entity);
+    auto *rightRL = &createRightRL(game, entity);
+    auto *leftRL = &createLeftRL(game, entity);
+
+    auto& cChildren = entity.addComponent<CChildren>();
+    cChildren.children = {rightArm, leftArm, rightRL, leftRL};
 }
 
 

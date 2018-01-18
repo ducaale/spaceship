@@ -17,6 +17,17 @@
 
 #include "utility.h"
 
+struct CParent : Component {
+    Entity *parent = nullptr;
+    CParent(Entity *entity) : parent(entity) {}
+
+    sf::Transform getTransform(bool origin=false, bool scale=false);
+};
+
+struct CChildren : Component {
+    std::vector<Entity*> children;
+};
+
 struct CTransform : Component {
     sf::Vector2f position;
     float angle;
@@ -77,13 +88,6 @@ struct CPhysics : Component {
     float getSpeedPercentage() {
         return getSpeed() / maxSpeed;
     }
-};
-
-struct CParent : Component {
-    Entity *parent = nullptr;
-    CParent(Entity *entity) : parent(entity) {}
-
-    sf::Transform getTransform(bool origin=false, bool scale=false);
 };
 
 template <class T>
@@ -281,8 +285,14 @@ struct CExplosion : Component {
 
         auto position = entity->getComponent<CTransform>().position;
 
+        sf::Transform t;
+        if(entity->hasComponent<CParent>()) {
+            t = entity->getComponent<CParent>().getTransform();
+        }
+        auto gloablPosition = t.transformPoint(position);
+
         auto& explosion_entity = game->manager.addEntity();
-        explosion_entity.addComponent<CTransform>(position);
+        explosion_entity.addComponent<CTransform>(gloablPosition);
         explosion_entity.addComponent<CTimerKiller>(0.45f);
         auto& cSprite = explosion_entity.addComponent<CAnimatedSprite>(game, AnimatedSprite(sf::seconds(0.1), false, false), 32, 32);
         cSprite.setScale(2.5f, 2.5f);
@@ -396,6 +406,18 @@ struct CHealth : Component {
         else {
             entity->destroy();
         }
+    }
+};
+
+struct CSharedHealth : Component {
+    Entity *parent = nullptr;
+
+    void init() override {
+        parent = entity->getComponent<CParent>().parent;
+    }
+
+    void loseHealth(int amount) {
+        parent->getComponent<CHealth>().loseHealth(amount);
     }
 };
 
