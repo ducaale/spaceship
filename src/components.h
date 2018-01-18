@@ -435,6 +435,7 @@ struct CTarget : Component {
     bool targetOn = true;
 
     float target_angle;
+    float target_angle_offset = 0;
 
     CTarget(Game *game, Group target_name, float turn_speed, float accuracy) :
         game(game),
@@ -449,6 +450,8 @@ struct CTarget : Component {
 
         target_angle = atan2(cTransform->y() - target->getComponent<CTransform>().y(),
                 cTransform->x() - target->getComponent<CTransform>().x()) * 180 / PI;
+
+        target_angle += target_angle_offset;
     }
 
     void disableTargeting() {
@@ -463,6 +466,8 @@ struct CTarget : Component {
         if(targetOn) {
             target_angle = atan2(cTransform->y() - target->getComponent<CTransform>().y(),
                     cTransform->x() - target->getComponent<CTransform>().x()) * 180 / PI;
+
+            target_angle += target_angle_offset;
         }
 
 

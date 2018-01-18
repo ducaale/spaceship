@@ -308,7 +308,10 @@ struct COrbBehaviour : Component, public Observer {
         close_to_normal,
         start_targeting,
         end_targeting,
-        teleport
+        teleport,
+        zero_offset_target,
+        plus_offset_target,
+        minus_offset_target
     };
 
     States currentState = States::none;
@@ -395,6 +398,21 @@ struct COrbBehaviour : Component, public Observer {
                 currentState = States::completed;
                 break;
 
+            case States::zero_offset_target:
+                cTarget->target_angle_offset = 0;
+                currentState = States::completed;
+                break;
+
+            case States::plus_offset_target:
+                cTarget->target_angle_offset += 20;
+                currentState = States::completed;
+                break;
+
+            case States::minus_offset_target:
+                cTarget->target_angle_offset -= 20;
+                currentState = States::completed;
+                break;
+
             default:
                 break;
         }
@@ -424,6 +442,16 @@ struct COrbBehaviour : Component, public Observer {
                 break;
             case Events::orb_teleport:
                 currentState = States::teleport;
+                break;
+            case Events::zero_offset_target:
+                currentState = States::zero_offset_target;
+                break;
+            case Events::plus_offset_target:
+                currentState = States::plus_offset_target;
+                break;
+            case Events::minus_offset_target:
+                currentState = States::minus_offset_target;
+                break;
             default:
                 break;
         }

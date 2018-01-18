@@ -16,7 +16,11 @@ enum Events : std::size_t {
     orb_start_lunching_rockets = 6,
     orb_end_lunching_rockets = 7,
 
-    orb_teleport = 8
+    orb_teleport = 8,
+
+    zero_offset_target = 9,
+    plus_offset_target = 10,
+    minus_offset_target = 11
 };
 
 
