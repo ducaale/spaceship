@@ -168,24 +168,36 @@ struct CHUD : Component {
     Game *game = nullptr;
     CHealth *cHealth = nullptr;
     sf::Text text;
+    sf::Sprite healthBar;
+    sf::Sprite healthBarBackground;
 
     CHUD(Game *game) : game(game) {
         text.setFont(game->font);
         text.setCharacterSize(24);
         text.setFillColor(sf::Color::White);
-        text.setPosition(50, 20);
+        text.setPosition(45, 18);
+
+        healthBar = sf::Sprite(game->resource["bar"], {0,112,128,16});
+        healthBar.setPosition(85, 27);
+
+        healthBarBackground = sf::Sprite(game->resource["bar"], {0,0,128,16});
+        healthBarBackground.setPosition(85, 27);
     }
 
     void init() override {
         cHealth = &entity->getComponent<CHealth>();
     }
 
+
     void update(float elapsedTime) override {
         text.setString(std::to_string(cHealth->health));
+        healthBar.setScale(cHealth->getHealthPercentage(), 1);
     }
 
     void draw() override {
         game->renderHUD(text);
+        game->renderHUD(healthBarBackground);
+        game->renderHUD(healthBar);
     }
 };
 
@@ -241,7 +253,7 @@ void createPlayer(Game *game) {
     auto& entity = game->manager.addEntity();
 
     entity.addComponent<CTransform>(position, angle);
-    entity.addComponent<CHealth>(20);
+    entity.addComponent<CHealth>(game, 20, 2);
     entity.addComponent<CSprite>(game, sf::Sprite(game->resource["player"], {0,0,160,70}));
     entity.addComponent<CPhysics>(max_speed, 0.f, acceleration);
     entity.addComponent<CPlayerBoost>(game);
@@ -254,6 +266,7 @@ void createPlayer(Game *game) {
     cSprite.changeFrame("right");
 
     entity.addComponent<CExplosion>(game);
+    entity.addComponent<CBlink>();
     entity.addComponent<CPlayerMovement>(turn_speed);
 
     entity.addComponent<CHUD>(game);

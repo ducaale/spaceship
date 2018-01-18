@@ -300,14 +300,40 @@ struct CExplosion : Component {
     }
 };
 
+struct CBlink : Component {
+    float counter = 0;
+
+    void update(float elapsedTime) override {
+        counter += elapsedTime;
+    }
+
+    void blink() {
+        auto period = 0.08f;
+        auto theta = counter / period;
+        if(sin(theta) > 0) {
+            entity->addGroup(Groups::drawable);
+        }
+        else {
+            entity->delGroup(Groups::drawable);
+        }
+    }
+};
+
 struct CHealth : Component {
+    Game *game = nullptr;
     int health;
+    int maxHealth;
     float lastHit = 0;
-    float invincibleFrames = 3.f;
+    float invincibleFrames;
 
     bool isInvincible = false;
 
-    CHealth(int health) : health(health) {}
+    CHealth(Game *game, int health, float invincibleFrames) :
+        game(game),
+        health(health),
+        maxHealth(health),
+        invincibleFrames(invincibleFrames)
+    {}
 
     void update(float elapsedTime) override {
         if(isInvincible) {
@@ -316,11 +342,27 @@ struct CHealth : Component {
             if(lastHit > invincibleFrames) {
                 isInvincible = false;
                 lastHit = 0;
+
+                if(entity->hasGroup(Groups::player)) {
+                    if(isAlive()) {
+                        entity->addGroup(Groups::drawable);
+                    }
+                    else {
+                        entity->delGroup(Groups::drawable);
+                    }
+                }
+            }
+            else {
+                if(entity->hasComponent<CBlink>()) entity->getComponent<CBlink>().blink();
             }
         }
+
+        if(entity->hasGroup(Groups::player) && game->gameOver) entity->delGroup(Groups::drawable);
     }
 
     int isAlive() { return health > 0; }
+
+    float getHealthPercentage() { return (float) health / maxHealth; }
 
     void loseHealth(int amount) {
         if(isInvincible || !isAlive()) return;
@@ -330,13 +372,29 @@ struct CHealth : Component {
         if(!isAlive()) onDeath();
 
         isInvincible = true;
-
-        if(!isAlive()) entity->delGroup(Groups::drawable);
     }
 
     void onDeath() {
-        if(entity->hasComponent<CExplosion>()) {
-            entity->getComponent<CExplosion>().explode();
+        if(entity->hasComponent<CChildren>()) {
+            for(auto& child : entity->getComponent<CChildren>().children) {
+                if(child->hasComponent<CExplosion>()) child->getComponent<CExplosion>().explode();
+
+                if(child->hasGroup(Groups::player)) {
+                    child->delGroup(Groups::drawable);
+                }
+                else {
+                    child->destroy();
+                }
+            }
+        }
+
+        if(entity->hasComponent<CExplosion>()) entity->getComponent<CExplosion>().explode();
+        if(entity->hasGroup(Groups::player)) {
+            entity->delGroup(Groups::drawable);
+            game->gameOver = true;
+        }
+        else {
+            entity->destroy();
         }
     }
 };
