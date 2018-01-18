@@ -586,6 +586,23 @@ struct CRocketBehaviour : Component {
     }
 };
 
+struct CMuzzleFlash : Component {
+
+    Game *game = nullptr;
+
+    CMuzzleFlash(Game *game) : game(game) {}
+
+    void fire(sf::Vector2f position) {
+        auto& entity = game->manager.addEntity();
+        entity.addComponent<CTransform>(position);
+        entity.addComponent<CTimerKiller>(0.1f);
+        entity.addComponent<CSprite>(game, sf::Sprite(game->resource["guns"], {0,256,64,64}));
+
+        entity.addGroup(Groups::drawable);
+        entity.setLayer(2);
+    }
+};
+
 struct CGun : Component {
     Game *game;
     sf::Sprite sprite;
