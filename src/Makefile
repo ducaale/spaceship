@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-Wall -ggdb -std=c++1z
 LDFLAGS=
-LIBS=-DSFML_STATIC -static-libgcc -static-libstdc++ -lmingw32 -lsfml-graphics-s -lsfml-window-s -lsfml-audio-s -lsfml-system-s -lopengl32 -lfreetype -ljpeg -lwinmm -lgdi32 -lopenal32 -lFLAC -lvorbisenc -lvorbisfile -lvorbis -logg
+LIBS=-DSFML_STATIC -static -lpthread -static-libgcc -static-libstdc++ -lmingw32 -lsfml-graphics-s -lsfml-window-s -lsfml-audio-s -lsfml-system-s -lopengl32 -lfreetype -ljpeg -lwinmm -lgdi32 -lopenal32 -lFLAC -lvorbisenc -lvorbisfile -lvorbis -logg
 
 INCLUDE_PATHS=-IC:\sfml-2.4-static\include
 LIBRARY_PATHS=-LC:\sfml-2.4-static\lib
