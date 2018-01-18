@@ -42,8 +42,8 @@ public:
 private:
     sf::RenderWindow window{{800,600}, "Spaceship"};
 
-    Camera *camera = nullptr;
-    Collision *collision = nullptr;
+    std::unique_ptr<Camera> camera;
+    std::unique_ptr<Collision> collision;
 
     int f = 0;
     sf::Clock clock;

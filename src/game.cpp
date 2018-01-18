@@ -64,9 +64,9 @@ void Game::restart() {
 
     ai.init();
 
-    camera = new Camera(manager, window);
+    camera = std::make_unique<Camera>(manager, window);
 
-    collision = new Collision(manager);
+    collision = std::make_unique<Collision>(manager);
     collision->noCollision = {
         {Groups::enemy, Groups::enemy},
         {Groups::enemy, Groups::enemy_bullet},
@@ -87,8 +87,7 @@ void Game::run() {
         updatePhase();
         drawPhase();
 
-        f++;
-        if((f % 10) == 0) {
+        if((++f % 10) == 0) {
             window.setTitle(std::to_string(std::round(1.f / elapsedTime.asSeconds())));
         }
     }
