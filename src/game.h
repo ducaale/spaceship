@@ -16,11 +16,14 @@ class Game {
 public:
     Game();
 
+    void restart();
     void run();
 
     void updatePhase();
     void inputPhase();
     void drawPhase();
+
+    void displayGameOver();
 
     void render(const sf::Drawable& drawable, const sf::Transform& t = sf::Transform::Identity);
     void renderHUD(const sf::Drawable& drawable);
@@ -33,6 +36,8 @@ public:
 
     std::map<std::string, sf::Texture> resource;
     sf::Font font;
+
+    bool gameOver = false;
 
 private:
     sf::RenderWindow window{{800,600}, "Spaceship"};

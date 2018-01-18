@@ -45,6 +45,13 @@ Game::Game() {
     window.setFramerateLimit(60);
 
     loadResources();
+    restart();
+}
+
+void Game::restart() {
+
+    manager = Manager();
+    ai = AI();
 
     createPlayer(this);
     createOrb(this);
@@ -88,6 +95,13 @@ void Game::inputPhase() {
             window.close();
         }
     }
+
+    if(gameOver) {
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+            gameOver = false;
+            restart();
+        }
+    }
 }
 
 void Game::updatePhase() {
@@ -102,6 +116,7 @@ void Game::updatePhase() {
 
 void Game::drawPhase() {
     manager.draw();
+    if(gameOver) displayGameOver();
     window.display();
 }
 
@@ -115,6 +130,23 @@ void Game::renderHUD(const sf::Drawable& drawable) {
     window.draw(drawable);
 
     window.setView(camera->view);
+}
+
+void Game::displayGameOver() {
+    sf::Text text;
+    text.setFont(font);
+    text.setCharacterSize(64);
+    text.setFillColor(sf::Color::White);
+    text.setString("Game Over");
+    text.setOrigin(text.getGlobalBounds().width / 2.f, text.getGlobalBounds().height / 2.f);
+    text.setPosition(window.getSize().x / 2.f, window.getSize().y / 3.f);
+    renderHUD(text);
+
+    text.setString("Press r to rety");
+    text.setCharacterSize(34);
+    text.setOrigin(text.getGlobalBounds().width / 2.f, text.getGlobalBounds().height / 2.f);
+    text.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
+    renderHUD(text);
 }
 
 int main() {
