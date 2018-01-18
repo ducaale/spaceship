@@ -299,8 +299,6 @@ struct COrbBehaviour : Component, public Observer {
     enum States : std::size_t {
         none,
         completed,
-        normal_to_close,
-        close_to_open,
         normal_to_open,
         open_laser,
         close_laser,
@@ -338,18 +336,6 @@ struct COrbBehaviour : Component, public Observer {
     void update(float elapsedTime) override {
 
         switch(currentState) {
-
-            case States::normal_to_close:
-                cSprite->sprite.stop();
-                cSprite->play("normal_to_close", [&]() { currentState = States::close_to_open; });
-                currentState = States::none;
-                break;
-
-            case States::close_to_open:
-                cSprite->sprite.stop();
-                cSprite->play("close_to_open", [&]() { currentState = States::open_laser; });
-                currentState = States::none;
-                break;
 
             case States::normal_to_open:
                 cSprite->sprite.stop();
