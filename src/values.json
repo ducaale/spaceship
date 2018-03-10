@@ -1,7 +1,7 @@
 {
     "player": {
         "initial_position": {
-            "x": 100.0,
+            "x": 50.0,
             "y": 0.0
         },
         "initial_angle" : 180,
